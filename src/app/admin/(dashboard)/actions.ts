@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import crypto from "crypto";
 import bcryptjs from "bcryptjs";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendSetPasswordEmail } from "@/lib/email";
 
 interface DashboardStats {
   totalLeads: number;
@@ -246,11 +246,16 @@ export async function createCustomer(prevState: unknown, formData: FormData) {
       setPasswordExpires: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
     });
 
-    // Send welcome email
+    // Send welcome and set password emails
     const setPasswordUrl = `${process.env.NEXTAUTH_URL}/set-password?token=${token}`;
     await sendWelcomeEmail({
       name: firstName,
       to: email.toLowerCase(),
+    });
+
+    await sendSetPasswordEmail({
+      name: firstName,
+      email: email.toLowerCase(),
       setPasswordUrl,
     });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import UpcomingPaymentsIcon from "@/components/ui/icons/upcoming-payments-icon";
 import { 
   Check, 
@@ -133,6 +134,7 @@ const PLANS = [
     payout: "0% Payout Fee",
     fullWidth: true,
     badge: "VIP Exclusive",
+    isEnterprise: true,
   }
 ];
 
@@ -187,26 +189,27 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Current Subscription Status */}
-      <Card className="border-emerald-100 bg-linear-to-r from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-950 dark:border-emerald-900/50 shadow-sm">
-        <CardContent className="py-6">
+      <Card className="border-emerald-100 bg-linear-to-r from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-950 dark:border-emerald-900/50 shadow-sm overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
+        <CardContent className="py-6 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
-                <ShieldCheck className="h-6 w-6" />
+              <div className="h-14 w-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold shadow-inner">
+                <ShieldCheck className="h-7 w-7" />
               </div>
               <div>
-                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Current Plan</p>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white capitalize">
-                    {currentPlan.name} Plan
+                <p className="text-[10px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-[0.2em]">Current Subscription</p>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">
+                    {currentPlan.name} <span className="text-slate-400 font-light">Partner</span>
                   </h2>
-                  <Badge className="bg-emerald-500 text-white border-none capitalize">
+                  <Badge className="bg-emerald-500 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-white border-none">
                     {user.subscriptionStatus || "active"}
                   </Badge>
                 </div>
                 {userPlan === "free" && (
-                  <div className="flex items-center gap-1.5 mt-1.5 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
-                    <Check className="h-3 w-3" />
+                  <div className="flex items-center gap-1.5 mt-1 text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
+                    <div className="h-1 w-1 rounded-full bg-emerald-500" />
                     Manage up to 30 Leads
                   </div>
                 )}
@@ -214,14 +217,16 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
             </div>
 
             {user.subscriptionEndDate && (
-              <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-slate-900 rounded-xl border border-emerald-100 dark:border-emerald-800 shadow-sm">
-                <Clock className="h-5 w-5 text-emerald-600" />
+              <div className="flex items-center gap-4 px-5 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm">
+                <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-emerald-600">
+                  <Clock className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Valid Until</p>
-                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Renews On</p>
+                  <p className="text-sm font-black text-slate-700 dark:text-slate-200">
                     {new Date(user.subscriptionEndDate).toLocaleDateString("en-IN", {
                       day: "numeric",
-                      month: "short",
+                      month: "long",
                       year: "numeric"
                     })}
                   </p>
@@ -234,128 +239,147 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
 
       <div className="space-y-8">
         {/* Plan Comparison */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          {PLANS.filter(p => p.id !== "free").map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative overflow-hidden rounded-2xl border-2 flex flex-col transition-all duration-300 group ${
-                plan.highlight 
-                  ? "border-emerald-500 shadow-2xl shadow-emerald-500/20 scale-[1.02] z-10 bg-linear-to-b from-slate-900 to-slate-950 dark:from-slate-900 dark:to-slate-950" 
-                  : plan.isCurrent(userPlan)
-                  ? "border-emerald-500/50 shadow-lg bg-white dark:bg-slate-900"
-                  : "border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xl bg-white dark:bg-slate-900"
-              } ${(plan as any).fullWidth ? "md:col-span-2 lg:col-span-3" : ""}`}
-            >
-              {/* Badge */}
-              {plan.badge ? (
-                <div className="absolute top-3 right-3">
-                  <div className="bg-linear-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
-                    <Star className="h-2.5 w-2.5 fill-white" />
-                    {plan.badge}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr mt-12">
+          {PLANS.filter(p => p.id !== "free").map((plan) => {
+            const isEnterprise = (plan as any).isEnterprise;
+            return (
+              <motion.div
+                key={plan.name}
+                whileHover={{ y: -8, scale: 1.01 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className={`relative overflow-hidden rounded-[2.5rem] border-2 flex flex-col transition-all duration-500 group ${
+                  isEnterprise
+                    ? "border-slate-800 dark:border-slate-800 bg-slate-950 shadow-2xl shadow-emerald-500/10"
+                    : plan.highlight 
+                    ? "border-emerald-500 shadow-2xl shadow-emerald-500/20 z-10 bg-linear-to-b from-slate-900 to-slate-950" 
+                    : plan.isCurrent(userPlan)
+                    ? "border-emerald-500/50 shadow-lg bg-white dark:bg-slate-900"
+                    : "border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800 bg-white dark:bg-slate-900"
+                } ${(plan as any).fullWidth ? "md:col-span-2 lg:col-span-3" : ""}`}
+              >
+                {/* Enterprise Shimmer Border Effect */}
+                {isEnterprise && (
+                  <div className="absolute inset-0 pointer-events-none rounded-[2.5rem] p-[1.5px] overflow-hidden">
+                    <div className="absolute inset-[-50%] bg-linear-to-r from-transparent via-emerald-500/40 to-transparent animate-[spin_4s_linear_infinite]" />
+                    <div className="absolute inset-[1.5px] bg-slate-950 rounded-[2.4rem]" />
                   </div>
-                </div>
-              ) : plan.highlight ? (
-                <div className="absolute top-3 right-3">
-                  <div className="bg-linear-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
-                    <Star className="h-2.5 w-2.5 fill-white" />
-                    Recommended
-                  </div>
-                </div>
-              ) : plan.isCurrent(userPlan) ? (
-                <div className="absolute top-3 right-3">
-                  <div className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">
-                    Active Plan
-                  </div>
-                </div>
-              ) : null}
-
-              <div className={`flex-none p-6 pb-4 pt-8 ${plan.highlight ? "text-white" : ""}`}>
-                {plan.payout && (
-                  <Badge className={`mb-3 px-2 py-0 h-5 text-[10px] font-bold border-none uppercase tracking-tighter ${
-                    plan.highlight 
-                      ? "bg-emerald-500/20 text-emerald-400" 
-                      : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400"
-                  }`}>
-                    {plan.payout}
-                  </Badge>
                 )}
-                <h3 className={`text-2xl font-black tracking-tight ${plan.highlight ? "text-white" : "text-slate-900 dark:text-white"}`}>
-                  {plan.name}
-                </h3>
-                <div className="mt-4 flex items-baseline gap-1 min-h-[44px]">
-                  <span className={`text-4xl font-black drop-shadow-sm ${plan.highlight ? "text-emerald-400" : "text-slate-900 dark:text-white"}`}>
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span className={`text-sm font-semibold ${plan.highlight ? "text-slate-400" : "text-slate-400"}`}>
+
+                {/* Mesh/Radial glow for enterprise */}
+                {isEnterprise && (
+                  <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
+                    <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full" />
+                    <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/5 blur-[120px] rounded-full" />
+                  </div>
+                )}
+
+                {/* Badge */}
+                <div className="absolute top-6 right-6 z-20">
+                  {plan.badge ? (
+                    <div className="relative group/badge">
+                      <div className="absolute inset-0 bg-linear-to-r from-amber-400/50 to-orange-500/50 blur-md opacity-50 group-hover/badge:opacity-100 transition-opacity" />
+                      <div className="relative bg-linear-to-r from-amber-500 via-yellow-400 to-orange-500 text-slate-950 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg flex items-center gap-1.5 border border-white/20">
+                        <Star className="h-3 w-3 fill-slate-950" />
+                        {plan.badge}
+                      </div>
+                    </div>
+                  ) : plan.highlight ? (
+                    <div className="bg-linear-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.15em] shadow-lg flex items-center gap-1.5">
+                      <Zap className="h-3 w-3 fill-white" />
+                      Most Popular
+                    </div>
+                  ) : plan.isCurrent(userPlan) ? (
+                    <div className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.15em] border border-emerald-200 dark:border-emerald-800 backdrop-blur-sm">
+                      Active Plan
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className={`relative z-10 flex-none p-8 pb-4 pt-10 ${plan.highlight || isEnterprise ? "text-white" : ""}`}>
+                  {plan.payout && (
+                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-lg mb-4 text-[10px] font-black uppercase tracking-widest ${
+                      isEnterprise
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : plan.highlight 
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" 
+                        : "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50"
+                    }`}>
+                      {plan.payout}
+                    </div>
+                  )}
+                  
+                  <div className="space-y-1">
+                    <h3 className={`text-3xl font-black tracking-tight ${plan.highlight || isEnterprise ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                      {plan.name}
+                    </h3>
+                    <p className={`text-sm font-medium ${isEnterprise ? "text-slate-400/80" : plan.highlight ? "text-slate-400" : "text-slate-500 dark:text-slate-400"}`}>
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-8 flex items-baseline gap-1.5">
+                    <span className={`text-5xl font-black tracking-tighter ${isEnterprise ? "text-emerald-400 [text-shadow:0_0_20px_rgba(52,211,153,0.3)]" : plan.highlight ? "text-emerald-400" : "text-slate-900 dark:text-white"}`}>
+                      {plan.price}
+                    </span>
+                    <span className={`text-sm font-bold opacity-60 ${plan.highlight || isEnterprise ? "text-slate-400" : "text-slate-400"}`}>
                       {plan.period}
                     </span>
+                  </div>
+                </div>
+
+                {/* Glassy Divider */}
+                <div className={`mx-8 h-px shrink-0 ${plan.highlight || isEnterprise ? "bg-white/5" : "bg-slate-100 dark:bg-slate-800"}`} />
+
+                {/* Features */}
+                <div className="relative z-10 flex-1 p-8 pt-6">
+                  <ul className="space-y-4">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-4 group/item">
+                        <div className={`h-6 w-6 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover/item:scale-110 ${
+                          isEnterprise
+                            ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                            : plan.highlight 
+                            ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400" 
+                            : "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800"
+                        }`}>
+                          <Check className="h-3.5 w-3.5 stroke-[4px]" />
+                        </div>
+                        <span className={`text-sm font-semibold tracking-wide ${isEnterprise ? "text-slate-300" : plan.highlight ? "text-slate-300" : "text-slate-700 dark:text-slate-300"}`}>
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Footer Button Section */}
+                <div className="relative z-10 flex-none p-8 pt-4 pb-8 mt-auto">
+                  {plan.isCurrent(userPlan) ? (
+                    <div className="w-full h-14 rounded-2xl flex items-center justify-center gap-2 bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 font-black uppercase tracking-[0.2em] text-[11px]">
+                      <ShieldCheck className="h-4 w-4" /> Current Active Plan
+                    </div>
+                  ) : (
+                    <Button 
+                      className={`w-full h-14 rounded-2xl font-black uppercase tracking-[0.15em] text-[11px] transition-all cursor-pointer shadow-xl ${
+                        isEnterprise
+                          ? "bg-linear-to-r from-emerald-500 via-emerald-400 to-teal-500 text-slate-950 hover:scale-[1.02] hover:shadow-emerald-500/40"
+                          : plan.highlight 
+                          ? "bg-linear-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 hover:scale-[1.02] hover:shadow-emerald-500/30" 
+                          : "bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-700 dark:hover:bg-slate-600 hover:scale-[1.02] hover:shadow-slate-500/20"
+                      }`}
+                      onClick={() => {
+                        setSelectedPlan(plan);
+                        setIsPaymentModalOpen(true);
+                      }}
+                    >
+                      {plan.buttonText}
+                      {isEnterprise || plan.highlight ? <Zap className="ml-2 h-4 w-4 fill-current" /> : null}
+                    </Button>
                   )}
                 </div>
-                <p className={`pt-2 h-10 text-sm font-medium ${plan.highlight ? "text-slate-400" : "text-slate-500 dark:text-slate-400"}`}>
-                  {plan.description}
-                </p>
-              </div>
-
-              {/* Divider */}
-              <div className={`mx-6 h-px ${plan.highlight ? "bg-white/10" : "bg-slate-100 dark:bg-slate-800"}`} />
-
-              {/* Features */}
-              <div className="flex-1 p-6 pt-5">
-                <ul className="space-y-3.5">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm">
-                      <div className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${
-                        plan.highlight 
-                          ? "bg-emerald-500/20 border border-emerald-500/30" 
-                          : "bg-emerald-100/80 dark:bg-emerald-900/50"
-                      }`}>
-                        <Check className={`h-3 w-3 ${plan.highlight ? "text-emerald-400" : "text-emerald-600 dark:text-emerald-400"}`} />
-                      </div>
-                      <span className={`font-medium leading-tight ${plan.highlight ? "text-slate-300" : "text-slate-700 dark:text-slate-300"}`}>
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Footer */}
-              <div className="flex-none p-6 pt-4 pb-6 mt-auto">
-                {plan.isCurrent(userPlan) ? (
-                  <Button 
-                    className="w-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 font-bold h-12 rounded-xl border border-emerald-200 dark:border-emerald-800 cursor-default" 
-                    disabled
-                  >
-                    <Check className="mr-2 h-4 w-4" /> Current Plan
-                  </Button>
-                ) : plan.id === "free" ? (
-                  <Button 
-                    className="w-full text-slate-500 cursor-default h-12 font-bold rounded-xl" 
-                    disabled 
-                    variant="outline"
-                  >
-                    Base Plan
-                  </Button>
-                ) : (
-                  <Button 
-                    className={`w-full h-12 rounded-xl font-bold transition-all shadow-lg cursor-pointer ${
-                      plan.highlight 
-                        ? "bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5" 
-                        : "bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-700 dark:hover:bg-slate-600 hover:-translate-y-0.5 hover:shadow-lg"
-                    }`}
-                    onClick={() => {
-                      setSelectedPlan(plan);
-                      setIsPaymentModalOpen(true);
-                    }}
-                  >
-                    {plan.buttonText}
-                    {plan.highlight ? <Zap className="ml-2 h-4 w-4" /> : null}
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-3xl p-6 border border-emerald-100 dark:border-emerald-800/50 flex flex-col md:flex-row items-center gap-6">

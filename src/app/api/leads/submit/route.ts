@@ -14,6 +14,7 @@ import {
   sendLeadConfirmationEmail,
   sendLeadNotificationEmail,
   sendWelcomeEmail,
+  sendSetPasswordEmail,
 } from "@/lib/email";
 
 // Validation Schema matching the form
@@ -232,8 +233,16 @@ export async function POST(request: Request) {
       sendWelcomeEmail({
         name: primaryContact.firstName,
         to: primaryContact.email,
-        setPasswordUrl,
       }),
+      ...(setPasswordUrl
+        ? [
+            sendSetPasswordEmail({
+              name: primaryContact.firstName,
+              email: primaryContact.email,
+              setPasswordUrl,
+            }),
+          ]
+        : []),
       sendLeadConfirmationEmail({
         name: fullName,
         email: primaryContact.email,

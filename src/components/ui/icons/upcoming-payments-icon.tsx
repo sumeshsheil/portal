@@ -28,7 +28,7 @@ const UpcomingPaymentsIcon = ({ className }: { className?: string }) => {
               alt={`payment-method-${index}`}
               width={36}
               height={36}
-              className="object-contain opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="object-contain opacity-60 grayscale hover:grayscale-0 hover:opacity-100 dark:invert transition-all duration-300"
             />
           </div>
         ))}

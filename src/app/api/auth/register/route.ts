@@ -4,7 +4,7 @@ import User from "@/lib/db/models/User";
 import { z } from "zod";
 import crypto from "crypto";
 import bcryptjs from "bcryptjs";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendSetPasswordEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -70,10 +70,15 @@ export async function POST(req: Request) {
     // The link will open a popup on the landing page
     const setPasswordUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/?token=${rawToken}&action=set-password`;
 
-    // Send Welcome Email
+    // Send Welcome and Set Password Emails
     await sendWelcomeEmail({
       name: name,
       to: customerEmail,
+    });
+
+    await sendSetPasswordEmail({
+      name: name,
+      email: customerEmail,
       setPasswordUrl,
     });
 

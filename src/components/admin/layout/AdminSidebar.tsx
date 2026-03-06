@@ -47,7 +47,6 @@ export function AdminAppSidebar() {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
   const isAgent = session?.user?.role === "agent";
-  const isDarkMode = useTheme().resolvedTheme === "dark";
   const { isMobile, state, setOpenMobile } = useSidebar();
 
   const collapsed = state === "collapsed";
@@ -175,23 +174,20 @@ export function AdminAppSidebar() {
                   </div>
                 ) : (
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    {isDarkMode ? (
-                      <Image
-                        src={logo}
-                        alt="Budget Travel Packages"
-                        width={120}
-                        height={50}
-                        className="h-8 w-auto object-contain"
-                      />
-                    ) : (
-                      <Image
-                        src={logoDark}
-                        alt="Budget Travel Packages"
-                        width={120}
-                        height={50}
-                        className="h-8 w-auto object-contain"
-                      />
-                    )}
+                    <Image
+                      src={logo}
+                      alt="Budget Travel Packages"
+                      width={120}
+                      height={50}
+                      className="h-8 w-auto object-contain hidden dark:block"
+                    />
+                    <Image
+                      src={logoDark}
+                      alt="Budget Travel Packages"
+                      width={120}
+                      height={50}
+                      className="h-8 w-auto object-contain block dark:hidden"
+                    />
                   </div>
                 )}
               </Link>

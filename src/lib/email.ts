@@ -1,9 +1,11 @@
 import { Resend } from "resend";
+import { getWelcomeEmailHtml, getLeadConfirmationEmailHtml } from "./email-templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
-const BOOKINGS_EMAIL = `Budget Travel <${process.env.BOOKINGS_EMAIL || "bookings@budgettravelpackages.in"}>`;
-const HELLO_EMAIL = `Budget Travel <${process.env.HELLO_EMAIL || "hello@budgettravelpackages.in"}>`;
+const BOOKINGS_EMAIL = "Budget Travel Packages <booking@budgettravelpackages.in>";
+const HELLO_EMAIL = "Budget Travel Packages <hello@budgettravelpackages.in>";
+const NOREPLY_EMAIL = "Budget Travel Packages <noreply@budgettravelpackages.in>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "sm.sanny1235@gmail.com";
 
 // --- Email Templates (Shared Styles) ---
@@ -132,60 +134,16 @@ interface OtpEmailProps {
 export async function sendWelcomeEmail({
   name,
   to,
-  setPasswordUrl,
 }: {
   name: string;
   to: string;
-  setPasswordUrl?: string;
 }) {
   try {
-    const setPasswordBlock = setPasswordUrl
-      ? `
-        <div style="${styles.dataBox}">
-          <p style="${styles.dataItem}"><strong>Your Dashboard Account</strong></p>
-          <p style="${styles.p}">We've created a personal dashboard for you to track your booking, view updates, and manage payments. Set your password below to activate it:</p>
-          <div style="text-align: center;">
-            <a href="${setPasswordUrl}" style="${styles.button}">Set Your Password</a>
-          </div>
-          <p style="font-size: 13px; color: #888; margin-top: 16px; text-align: center;">This link expires in 72 hours.</p>
-        </div>
-      `
-      : "";
-
     const { data, error } = await resend.emails.send({
       from: HELLO_EMAIL,
       to: [to],
       subject: "Welcome to Budget Travel Packages! 🌍",
-      html: `
-        <div style="${styles.container}">
-          <div style="${styles.header}">
-            <h1 style="${styles.headerTitle}">Budget Travel Packages</h1>
-          </div>
-          <div style="${styles.body}">
-            <h2 style="${styles.h2}">Hello ${name},</h2>
-            <p style="${styles.p}">Thank you for choosing <strong>Budget Travel Packages</strong> as your travel partner!</p>
-            <p style="${styles.p}">We’re thrilled to have you join our community of explorers. Whether you’re dreaming of misty mountains, sun-kissed beaches, or vibrant cityscapes, we’re here to turn those dreams into reality without breaking the bank.</p>
-            
-            ${setPasswordBlock}
-
-            <p style="${styles.p}">Our team is already reviewing your request, and you’ll receive a detailed confirmation shortly.</p>
-
-            <p style="${styles.p}">In the meantime, feel free to explore our <a href="${process.env.NEXTAUTH_URL}/blogs" style="color: #000; font-weight: 700; text-decoration: underline;">Travel Blogs</a> for inspiration or browse our <a href="${process.env.NEXTAUTH_URL}/packages" style="color: #000; font-weight: 700; text-decoration: underline;">Exclusive Packages</a>.</p>
-            
-            <div style="text-align: center;">
-              <a href="${process.env.NEXTAUTH_URL}" style="${styles.button}">Explore Destinations</a>
-            </div>
-
-            <p style="${styles.p}">We look forward to creating unforgettable memories with you.</p>
-            
-            <p style="${styles.p}">Warm regards,<br/>The Budget Travel Team</p>
-          </div>
-          <div style="${styles.footer}">
-            <p>Connect with us on <a href="#" style="color: #666; text-decoration: underline;">Instagram</a> and <a href="#" style="color: #666; text-decoration: underline;">Facebook</a>.</p>
-            <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
-          </div>
-        </div>
-      `,
+      html: getWelcomeEmailHtml(name),
     });
 
     if (error) {
@@ -195,6 +153,53 @@ export async function sendWelcomeEmail({
     return { success: true, data };
   } catch (error) {
     console.error("Email Exception (User Welcome):", error);
+    return { success: false, error };
+  }
+}
+
+// 1b. Send Set Password Email (From NOREPLY_EMAIL)
+export async function sendSetPasswordEmail({
+  name,
+  email,
+  setPasswordUrl,
+}: {
+  name: string;
+  email: string;
+  setPasswordUrl: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: [email],
+      subject: "Set Your Password - Budget Travel Packages 🔒",
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">Budget Travel Packages</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${name},</h2>
+            <p style="${styles.p}">We've created a personal dashboard for you to track your bookings, view updates, and manage payments.</p>
+            <p style="${styles.p}">Please click the button below to set your password and activate your account:</p>
+            <div style="text-align: center;">
+              <a href="${setPasswordUrl}" style="${styles.button}">Set Your Password</a>
+            </div>
+            <p style="font-size: 13px; color: #888; margin-top: 24px; text-align: center;">This link expires in 72 hours.</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Set Password):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Set Password):", error);
     return { success: false, error };
   }
 }
@@ -211,7 +216,7 @@ export async function sendAgentWelcomeEmail({
     const { data, error } = await resend.emails.send({
       from: BOOKINGS_EMAIL, // Or could be a dedicated admin email, but keeping it simple
       to: [to],
-      subject: "Welcome to Budget Travel Admin Panel",
+      subject: "Welcome to Budget Travel Packages Admin Panel",
       html: `
         <div style="${styles.container}">
           <div style="${styles.header}">
@@ -321,36 +326,7 @@ export async function sendLeadConfirmationEmail({
       from: BOOKINGS_EMAIL,
       to: [email],
       subject: `Booking Received: Trip to ${destination} ✈️`,
-      html: `
-        <div style="${styles.container}">
-          <div style="${styles.header}">
-            <h1 style="${styles.headerTitle}">Booking Confirmation</h1>
-          </div>
-          <div style="${styles.body}">
-            <h2 style="${styles.h2}">Hello ${name},</h2>
-            <p style="${styles.p}">Great news! We have successfully received your booking inquiry for <strong>${destination}</strong>.</p>
-            <p style="${styles.p}">Our travel experts are reviewing your details provided below and will craft a personalized itinerary that fits your budget perfectly.</p>
-            
-            <div style="${styles.dataBox}">
-              <p style="${styles.dataItem}"><strong style="width: 100px; display: inline-block;">Destination:</strong> ${destination}</p>
-              <p style="${styles.dataItem}"><strong style="width: 100px; display: inline-block;">Travelers:</strong> ${guests} Person(s)</p>
-              <p style="${styles.dataItem}"><strong style="width: 100px; display: inline-block;">Budget:</strong> ₹${budget}</p>
-              <p style="${styles.dataItem}"><strong style="width: 100px; display: inline-block;">Contact:</strong> ${phone}</p>
-            </div>
-
-            <p style="${styles.p}"><strong>What happens next?</strong><br/>
-            One of our agents will reach out to you within 24 hours via phone or email to discuss customized options.</p>
-
-            <div style="text-align: center;">
-              <a href="${process.env.NEXTAUTH_URL}/packages" style="${styles.button}">View More Packages</a>
-            </div>
-          </div>
-          <div style="${styles.footer}">
-            <p>Need immediate assistance? Reply to this email or call us at +91-XXXXXXXXXX.</p>
-            <p>&copy; ${new Date().getFullYear()} Budget Travel Packages.</p>
-          </div>
-        </div>
-      `,
+      html: getLeadConfirmationEmailHtml(name, destination, guests, budget.toString(), phone),
     });
 
     if (error) {
@@ -598,7 +574,7 @@ export async function sendAgentRejectionEmail({
     const { data, error } = await resend.emails.send({
       from: HELLO_EMAIL,
       to: [agentEmail],
-      subject: "Action Required: Agent Verification Update",
+      subject: "Action Required: Agent Verification Update - Budget Travel Packages",
       html: `
         <div style="${styles.container}">
           <div style="${styles.header}">
@@ -655,7 +631,7 @@ export async function sendAgentApprovalEmail({
     const { data, error } = await resend.emails.send({
       from: HELLO_EMAIL,
       to: [agentEmail],
-      subject: "Welcome! Your Agent Account is Approved 🎉",
+      subject: "Welcome! Your Agent Account is Approved - Budget Travel Packages 🎉",
       html: `
         <div style="${styles.container}">
           <div style="${styles.header}">
