@@ -7,7 +7,13 @@ import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
 import { verifyAdmin } from "@/lib/auth-check";
 import { generatePassword } from "@/lib/password";
-import { sendAgentWelcomeEmail, sendAgentPromotionEmail } from "@/lib/email";
+import crypto from "crypto";
+import {
+  sendAgentWelcomeEmail,
+  sendAgentPromotionEmail,
+  sendAgentRejectionEmail,
+  sendAgentApprovalEmail,
+} from "@/lib/email";
 
 const createAgentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -198,11 +204,49 @@ export async function updateAgentVerificationStatus(
       return { success: false, error: "Agent not found" };
     }
 
+    let shouldSaveToken = false;
+    let resubmitUrl = "";
+
     agent.verificationStatus = status;
     agent.verificationNote = note || "";
-    agent.isVerified = status === "approved";
+
+    if (status === "approved") {
+      agent.isVerified = true;
+      agent.isActivated = true; // Make sure they can actually log in now
+    } else {
+      agent.isVerified = false;
+      agent.isActivated = false;
+
+      // Generate a new token for resubmission
+      const token = crypto.randomBytes(32).toString("hex");
+      const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+      agent.setPasswordToken = hashedToken;
+      agent.setPasswordExpires = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
+
+      resubmitUrl = `${process.env.NEXTAUTH_URL}/admin/onboarding?token=${token}`;
+      shouldSaveToken = true;
+    }
 
     await agent.save();
+
+    // Send email notifications
+    if (status === "rejected") {
+      await sendAgentRejectionEmail({
+        agentName: agent.name,
+        agentEmail: agent.email,
+        rejectionNote: note || "",
+        resubmitUrl: resubmitUrl,
+      });
+    } else if (status === "approved") {
+      await sendAgentApprovalEmail({
+        agentName: agent.name,
+        agentEmail: agent.email,
+      });
+    }
 
     revalidatePath("/admin/agents");
     revalidatePath("/admin/profile"); // In case the agent is viewing their own profile
@@ -216,6 +260,64 @@ export async function updateAgentVerificationStatus(
       error instanceof Error
         ? error.message
         : "Failed to update verification status";
+    return { success: false, error: message };
+  }
+}
+
+export async function updateAgentSubscription(
+  agentId: string,
+  status: "active" | "expired" | "pending",
+  plan: "free" | "pro",
+  billingCycle?: "monthly" | "90days" | "yearly",
+  transactionId?: string,
+) {
+  try {
+    await verifyAdmin();
+    await connectDB();
+
+    const agent = await User.findById(agentId);
+    if (!agent) {
+      return { success: false, error: "Agent not found" };
+    }
+
+    agent.plan = plan;
+    agent.subscriptionStatus = status;
+    if (transactionId) agent.transactionId = transactionId;
+    
+    if (status === "active" && billingCycle) {
+      agent.billingCycle = billingCycle;
+      
+      const endDate = new Date();
+      if (billingCycle === "monthly") {
+        endDate.setMonth(endDate.getMonth() + 1);
+      } else if (billingCycle === "90days") {
+        endDate.setDate(endDate.getDate() + 90);
+      } else if (billingCycle === "yearly") {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
+      agent.subscriptionEndDate = endDate;
+      agent.subscriptionStartDate = new Date();
+    } else if (plan === "free" || status === "expired") {
+      agent.subscriptionEndDate = undefined;
+      // Keep billing cycle for record? Let's clear it if they go to free
+      if (plan === "free") agent.billingCycle = undefined;
+    }
+
+    await agent.save();
+
+    revalidatePath("/admin/agents");
+    revalidatePath("/admin/subscriptions");
+    revalidatePath("/admin/subscription");
+
+    return {
+      success: true,
+      message: `Subscription ${status === "active" ? "approved" : "updated"} successfully`,
+    };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to update subscription status";
     return { success: false, error: message };
   }
 }

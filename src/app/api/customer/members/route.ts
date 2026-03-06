@@ -5,16 +5,44 @@ import User, { IMember } from "@/lib/db/models/User";
 import { z } from "zod";
 
 // Schema for a single member
-const memberSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email().optional().or(z.literal("")),
-  gender: z.enum(["male", "female", "other"]),
-  age: z.number().min(0).max(120),
-  documents: z.object({
-    aadharCard: z.array(z.string()).min(1, "Aadhar Card is mandatory"),
-    passport: z.array(z.string()).optional().default([]),
-  }),
-});
+const memberSchema = z
+  .object({
+    name: z.string().min(2).max(100),
+    email: z.string().email().optional().or(z.literal("")),
+    gender: z.enum(["male", "female", "other"]),
+    age: z.number().min(0).max(120),
+    aadhaarNumber: z
+      .string()
+      .regex(/^\d{12}$/, "Aadhaar must be 12 digits")
+      .optional()
+      .or(z.literal("")),
+    passportNumber: z
+      .string()
+      .regex(
+        /^[a-zA-Z0-9]{8}$/,
+        "Passport must be exactly 8 alphanumeric characters",
+      )
+      .optional()
+      .or(z.literal("")),
+    documents: z.object({
+      aadharCard: z.array(z.string()).optional().default([]),
+      passport: z.array(z.string()).optional().default([]),
+    }),
+  })
+  .superRefine((data, ctx) => {
+    // Aadhaar sync
+    if (
+      (data.documents.aadharCard.length > 0 && !data.aadhaarNumber) ||
+      (data.aadhaarNumber && data.documents.aadharCard.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Both Aadhar Number and Aadhar Card PDF are required together.",
+        path: ["aadhaarNumber"],
+      });
+    }
+  });
 
 // GET — return all members for the current user
 export async function GET() {
@@ -107,7 +135,24 @@ export async function POST(request: Request) {
 }
 
 // PUT — update multiple members or replace entirely
-const bulkMemberSchema = z.array(memberSchema).max(30);
+const bulkMemberSchema = z
+  .array(
+    memberSchema.superRefine((data, ctx) => {
+      // Aadhaar sync
+      if (
+        (data.documents.aadharCard.length > 0 && !data.aadhaarNumber) ||
+        (data.aadhaarNumber && data.documents.aadharCard.length === 0)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Both Aadhar Number and Aadhar Card PDF are required together.",
+          path: ["aadhaarNumber"],
+        });
+      }
+    }),
+  )
+  .max(30);
 
 export async function PUT(request: Request) {
   try {

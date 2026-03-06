@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,7 +13,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  UserPlus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
@@ -31,7 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { OtpInput } from "@/components/landing/sections/booking/components/OtpInput";
+import { OtpInput } from "@/components/ui/otp-input";
 
 // Schemas
 const loginSchema = z.object({
@@ -66,13 +64,15 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 type AuthView =
   | "LOGIN"
-  | "REGISTER"
   | "FORGOT_PASSWORD"
   | "OTP_VERIFICATION"
   | "RESET_PASSWORD";
 
-export function LoginForm() {
-  const router = useRouter();
+interface LoginFormProps {
+  onRegisterClick?: () => void;
+}
+
+export function LoginForm({ onRegisterClick }: LoginFormProps) {
   const [view, setView] = useState<AuthView>("LOGIN");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -83,7 +83,6 @@ export function LoginForm() {
   const [resetEmail, setResetEmail] = useState<string>("");
   const [verifiedOtp, setVerifiedOtp] = useState<string>("");
   const [countdown, setCountdown] = useState(0);
-  const [registerEmail, setRegisterEmail] = useState("");
 
   // Forms
   const loginForm = useForm<LoginFormValues>({
@@ -117,11 +116,42 @@ export function LoginForm() {
     return () => clearInterval(timer);
   }, [countdown]);
 
+  // Auto-verify OTP when 6 digits are entered
+  const otpValue = otpVerificationForm.watch("otp");
+  useEffect(() => {
+    if (otpValue?.length === 6 && !isLoading && view === "OTP_VERIFICATION") {
+      otpVerificationForm.handleSubmit(onVerifyOtp)();
+    }
+  }, [otpValue, isLoading, view]);
+
   // Handlers
   async function onLogin(values: LoginFormValues) {
     setIsLoading(true);
     setError(null);
     try {
+      const searchParams = new URLSearchParams(window.location.search);
+      let callbackUrl = searchParams.get("callbackUrl") || "/admin";
+
+      if (callbackUrl === "/admin/login" || callbackUrl === "/") {
+        callbackUrl = "/admin";
+      }
+
+      const validateRes = await fetch("/api/auth/validate-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
+      });
+
+      const validateData = await validateRes.json();
+
+      if (!validateRes.ok) {
+        setError(validateData.error || "Invalid email or password.");
+        return;
+      }
+
       const result = await signIn("credentials", {
         email: values.email,
         password: values.password,
@@ -129,20 +159,15 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password. Please try again.");
-        } else {
-          let cleanError = result.error.replace("Error: ", "");
-          setError(
-            cleanError || "Invalid email or password. Please try again.",
-          );
-        }
+        setError("Invalid email or password. Please try again.");
         return;
       }
 
       toast.success("Logged in successfully");
-      router.push("/admin");
-      router.refresh();
+
+      setTimeout(() => {
+        window.location.href = callbackUrl;
+      }, 500);
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -270,7 +295,7 @@ export function LoginForm() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
-          className="p-8 pt-4"
+          className="pb-2 px-8 pt-4"
         >
           {/* View Specific Header */}
           <div className="mb-8 text-center relative flex flex-col items-center justify-center">
@@ -278,7 +303,6 @@ export function LoginForm() {
               <button
                 onClick={() => {
                   if (view === "OTP_VERIFICATION") setView("FORGOT_PASSWORD");
-                  else if (view === "REGISTER") setView("LOGIN");
                   else setView("LOGIN");
                   setError(null);
                   setSuccessMessage(null);
@@ -304,20 +328,10 @@ export function LoginForm() {
             {view === "LOGIN" && (
               <div className="space-y-1">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                  Portal Dashboard
+                  Travel Portal
                 </h1>
                 <p className="text-gray-500 text-sm font-medium">
                   Please sign in to continue
-                </p>
-              </div>
-            )}
-            {view === "REGISTER" && (
-              <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                  Agent Registration
-                </h1>
-                <p className="text-gray-500 text-sm font-medium">
-                  Enter your email to get started
                 </p>
               </div>
             )}
@@ -458,91 +472,17 @@ export function LoginForm() {
                   <button
                     type="button"
                     onClick={() => {
-                      setView("REGISTER");
-                      setError(null);
-                      setSuccessMessage(null);
+                      if (onRegisterClick) {
+                        onRegisterClick();
+                      }
                     }}
                     className="text-emerald-600 font-bold hover:underline cursor-pointer"
                   >
-                    Sign up as an agent
+                    Join as Travel Partner
                   </button>
                 </p>
               </form>
             </Form>
-          )}
-
-          {/* REGISTER VIEW */}
-          {view === "REGISTER" && (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setIsLoading(true);
-                setError(null);
-                setSuccessMessage(null);
-                try {
-                  const res = await fetch("/api/auth/agent-register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: registerEmail }),
-                  });
-                  const data = await res.json();
-                  if (!res.ok) {
-                    setError(data.error || "Registration failed.");
-                    return;
-                  }
-                  setSuccessMessage(
-                    data.message ||
-                      "Check your email to complete registration!",
-                  );
-                } catch {
-                  setError("An unexpected error occurred.");
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
-              className="space-y-6"
-            >
-              <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-bold ml-1">
-                  Email Address
-                </label>
-                <Input
-                  type="email"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  placeholder="agent@example.com"
-                  disabled={isLoading}
-                  required
-                  className="h-12 bg-gray-50/50 border-gray-200 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500/10 transition-all rounded-xl text-base text-slate-900"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base transition-all rounded-xl shadow-lg shadow-emerald-500/20"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <UserPlus className="w-5 h-5 mr-2" />
-                )}
-                {isLoading ? "Registering..." : "Register as Agent"}
-              </Button>
-              <p className="text-center text-sm text-gray-500">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setView("LOGIN");
-                    setError(null);
-                    setSuccessMessage(null);
-                  }}
-                  className="text-emerald-600 font-bold hover:underline cursor-pointer"
-                >
-                  Sign in
-                </button>
-              </p>
-            </form>
           )}
 
           {/* FORGOT PASSWORD VIEW */}
@@ -711,10 +651,13 @@ export function LoginForm() {
             </Form>
           )}
 
-          <div className="mt-8 text-center">
+          <div className="mt-3 flex flex-col gap-3 text-center">
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-              Budget Travel Packages • Portal Dashboard
+              Dashboard
             </p>
+            <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+              Privacy Policy
+            </span>
           </div>
         </motion.div>
       </AnimatePresence>

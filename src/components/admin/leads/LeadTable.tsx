@@ -64,7 +64,7 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
         return "bg-blue-100 text-blue-700 border-blue-200";
       case "contacted":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "qualified":
+      case "booked":
         return "bg-green-100 text-green-700 border-green-200";
       case "proposal_sent":
         return "bg-purple-100 text-purple-700 border-purple-200";
@@ -72,9 +72,9 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
         return "bg-orange-100 text-orange-700 border-orange-200";
       case "won":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
-      case "lost":
+      case "dropped":
         return "bg-red-100 text-red-700 border-red-200";
-      case "stale":
+      case "abandoned":
         return "bg-gray-100 text-gray-700 border-gray-200";
       default:
         return "bg-slate-100 text-slate-700 border-slate-200";
@@ -188,7 +188,7 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
                   colSpan={isAdmin ? 7 : 6}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No leads found matching your criteria.
+                  No inquiries found matching your criteria.
                 </TableCell>
               </TableRow>
             ) : (
@@ -236,7 +236,17 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
                       variant="secondary"
                       className={`capitalize border ${getStageColor(lead.stage)}`}
                     >
-                      {lead.stage.replace("_", " ")}
+                      {lead.stage === "new"
+                        ? "Inquiry Received"
+                        : lead.stage === "contacted"
+                          ? "Under Review"
+                          : lead.stage === "proposal_sent"
+                            ? "Proposal Ready"
+                            : lead.stage === "negotiation"
+                              ? "Finalizing"
+                              : lead.stage === "won"
+                                ? "Trip Confirmed"
+                                : lead.stage.replace("_", " ")}
                     </Badge>
                   </TableCell>
                   <TableCell>

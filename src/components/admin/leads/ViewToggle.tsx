@@ -19,6 +19,7 @@ export function ViewToggle() {
       if (isSmallScreen && searchParams.get("view") !== "board") {
         const params = new URLSearchParams(searchParams);
         params.set("view", "board");
+        params.delete("stage");
         replace(`${pathname}?${params.toString()}`);
       }
     };
@@ -32,6 +33,9 @@ export function ViewToggle() {
     if (!newView) return; // Prevent unselecting
     const params = new URLSearchParams(searchParams);
     params.set("view", newView);
+    if (newView === "board") {
+      params.delete("stage");
+    }
     replace(`${pathname}?${params.toString()}`);
   };
 

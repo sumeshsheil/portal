@@ -165,6 +165,7 @@ interface PlanTripModalProps {
     phone?: string;
     gender?: string;
     isPhoneVerified: boolean;
+    birthDate?: Date;
   };
 }
 
@@ -207,6 +208,18 @@ export const PlanTripModal: React.FC<PlanTripModalProps> = ({
     }
   }, [tripType, duration, guests, budget, setValue]);
 
+  const calculateAge = (birthDate?: Date) => {
+    if (!birthDate) return 25; // Fallback
+    const today = new Date();
+    const dob = new Date(birthDate);
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const onSubmit = async (values: TripFormValues) => {
     setIsSubmitting(true);
     try {
@@ -228,7 +241,7 @@ export const PlanTripModal: React.FC<PlanTripModalProps> = ({
           lastName,
           email: user.email,
           phone: user.phone || "0000000000",
-          age: 25,
+          age: calculateAge(user.birthDate),
           gender: (user.gender as any) || "male",
         },
       };

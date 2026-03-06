@@ -17,7 +17,7 @@ export async function verifySession(): Promise<SessionUser> {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/admin/login");
+    redirect("/");
   }
 
   return session.user as SessionUser;

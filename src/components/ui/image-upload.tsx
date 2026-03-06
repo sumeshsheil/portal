@@ -158,7 +158,8 @@ export default function ImageUpload({
         ))}
       </div>
 
-      {(value.length < maxFiles || (maxFiles === 1 && value.length === 1)) && (
+      {!disabled &&
+        (value.length < maxFiles || (maxFiles === 1 && value.length === 1)) && (
         <div>
           <input
             type="file"

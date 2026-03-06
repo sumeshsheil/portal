@@ -218,69 +218,12 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                 maxFiles={1}
                 folder="/agent-profiles"
                 accept="image/*"
+                disabled={true}
               />
               <p className="text-xs text-muted-foreground mt-4 text-center">
-                Clear portrait for your agent profile. (Max 4MB)
+                Your professional agent profile photo.
               </p>
             </CardContent>
-          </Card>
-
-          <Card className="border-slate-200 dark:border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5 text-emerald-600" /> Identity
-                Documents
-              </CardTitle>
-              <CardDescription>
-                Upload clear PDF copies for verification.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label className="font-bold">Aadhaar Card (PDF)</Label>
-                <ImageUpload
-                  value={aadharCards}
-                  onChange={setAadharCards}
-                  onRemove={() => setAadharCards([])}
-                  maxFiles={1}
-                  folder="/agent-docs/aadhaar"
-                  accept="application/pdf"
-                  disabled={initialData.verificationStatus === "approved"}
-                />
-              </div>
-              <Separator />
-              <div className="space-y-3">
-                <Label className="font-bold">PAN Card (PDF)</Label>
-                <ImageUpload
-                  value={panCards}
-                  onChange={setPanCards}
-                  onRemove={() => setPanCards([])}
-                  maxFiles={1}
-                  folder="/agent-docs/pan"
-                  accept="application/pdf"
-                  disabled={initialData.verificationStatus === "approved"}
-                />
-              </div>
-            </CardContent>
-            {initialData.verificationStatus !== "approved" && (
-              <CardFooter>
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  onClick={onDocSubmit}
-                  disabled={
-                    isSubmittingDoc ||
-                    initialData.verificationStatus === "pending"
-                  }
-                >
-                  {isSubmittingDoc ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  Submit for Verification
-                </Button>
-              </CardFooter>
-            )}
           </Card>
         </div>
 
@@ -289,15 +232,12 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
           <CardHeader>
             <CardTitle className="text-xl">Personal Information</CardTitle>
             <CardDescription>
-              Update your contact and identification details.
+              Your contact and identification details (Read-only).
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onProfileSubmit)}
-                className="space-y-6"
-              >
+              <form className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Name */}
                   <FormField
@@ -311,8 +251,8 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                               className="pl-9"
-                              placeholder="John Doe"
                               {...field}
+                              disabled
                             />
                           </div>
                         </FormControl>
@@ -321,7 +261,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                     )}
                   />
 
-                  {/* Email (Read-only) */}
+                  {/* Email */}
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
@@ -334,7 +274,6 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                         />
                       </div>
                     </FormControl>
-                    <FormDescription>Registered login email.</FormDescription>
                   </FormItem>
 
                   {/* Phone */}
@@ -349,8 +288,8 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                               className="pl-9"
-                              placeholder="+91 98765 43210"
                               {...field}
+                              disabled
                             />
                           </div>
                         </FormControl>
@@ -373,9 +312,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                               className="pl-9"
                               type="number"
                               {...field}
-                              onChange={(e) =>
-                                field.onChange(e.target.valueAsNumber || 0)
-                              }
+                              disabled
                             />
                           </div>
                         </FormControl>
@@ -394,6 +331,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -423,8 +361,8 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                               className="pl-9"
-                              placeholder="Block A, Sector 12, Delhi"
                               {...field}
+                              disabled
                             />
                           </div>
                         </FormControl>
@@ -435,52 +373,44 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
 
                   <Separator className="md:col-span-2" />
 
-                  {/* Aadhaar Number */}
-                  <FormField
-                    control={form.control}
-                    name="aadhaarNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Aadhaar Number (12 Digits)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="1234 5678 9012" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Identity Documentation Integrated here */}
+                  <div className="md:col-span-2 space-y-6">
+                    <div>
+                      <h4 className="text-sm font-bold flex items-center gap-2 mb-4">
+                        <FileText className="h-4 w-4 text-emerald-600" /> Identity Documents
+                      </h4>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        Verified identity documents (Read-only).
+                      </p>
+                    </div>
 
-                  {/* PAN Number */}
-                  <FormField
-                    control={form.control}
-                    name="panNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>PAN Number</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="uppercase"
-                            placeholder="ABCDE1234F"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-4 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={isPending}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8"
-                  >
-                    {isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Save Changes
-                  </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Aadhaar Card (PDF)</Label>
+                        <ImageUpload
+                          value={aadharCards}
+                          onChange={setAadharCards}
+                          onRemove={() => setAadharCards([])}
+                          maxFiles={1}
+                          folder="/agent-docs/aadhaar"
+                          accept="application/pdf"
+                          disabled={true}
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">PAN Card (PDF)</Label>
+                        <ImageUpload
+                          value={panCards}
+                          onChange={setPanCards}
+                          onRemove={() => setPanCards([])}
+                          maxFiles={1}
+                          folder="/agent-docs/pan"
+                          accept="application/pdf"
+                          disabled={true}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </form>
             </Form>

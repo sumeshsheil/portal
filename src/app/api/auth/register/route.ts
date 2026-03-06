@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     });
 
     // The link will open a popup on the landing page
-    const setPasswordUrl = `${process.env.NEXTAUTH_URL}/?token=${rawToken}&action=set-password`;
+    const setPasswordUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/?token=${rawToken}&action=set-password`;
 
     // Send Welcome Email
     await sendWelcomeEmail({

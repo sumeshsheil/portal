@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,14 +38,37 @@ import {
 } from "@/components/ui/form";
 import { CameraCapture } from "@/components/admin/onboarding/CameraCapture";
 
+// Regex constants
+const INDIA_PHONE_REGEX = /^\d{10}$/;
+const AADHAAR_REGEX = /^\d{12}$/;
+const PAN_REGEX = /^[a-zA-Z0-9]{10}$/;
+
 // Step 1 schema
 const personalSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  gender: z.enum(["male", "female", "other"], "Gender is required"),
-  age: z.coerce.number().min(18, "Must be 18+").max(120),
-  phone: z.string().min(10, "Valid phone number required"),
-  address: z.string().min(5, "Address is required"),
+  firstName: z.string().trim().min(1, "Please enter your first name"),
+  lastName: z.string().trim().min(1, "Please enter your last name"),
+  gender: z
+    .any()
+    .refine((val) => ["male", "female", "other"].includes(String(val)), {
+      message: "Please select your gender",
+    }),
+  age: z
+    .any()
+    .refine(
+      (val) => {
+        const num = parseInt(String(val || ""), 10);
+        return !isNaN(num) && num >= 18 && num <= 120;
+      },
+      {
+        message: "Please enter a valid age (18-120)",
+      },
+    )
+    .transform((val) => parseInt(String(val), 10)),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(INDIA_PHONE_REGEX, "Please enter a valid 10-digit phone number"),
+  address: z.string().trim().min(1, "Please enter your full address"),
 });
 
 // Step 3 password
@@ -115,7 +138,7 @@ function OnboardingContent() {
             asChild
             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
           >
-            <a href="/admin/login">Go to Login</a>
+            <a href="/">Go to Login</a>
           </Button>
         </div>
       </div>
@@ -179,14 +202,31 @@ function OnboardingContent() {
     setStep(2);
   }
 
+  const formatAadhaar = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    const trimmed = digits.slice(0, 12);
+    const parts = [];
+    for (let i = 0; i < trimmed.length; i += 4) {
+      parts.push(trimmed.slice(i, i + 4));
+    }
+    return parts.join(" ");
+  };
+
+  const handleAadhaarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    if (rawValue.length <= 12) {
+      setAadhaarNumber(rawValue);
+    }
+  };
+
   function handleStep2Next() {
     setError(null);
-    if (!aadhaarNumber || aadhaarNumber.length < 12) {
+    if (!AADHAAR_REGEX.test(aadhaarNumber)) {
       setError("Please enter a valid 12-digit Aadhaar number.");
       return;
     }
-    if (!panNumber || panNumber.length < 10) {
-      setError("Please enter a valid PAN number.");
+    if (!PAN_REGEX.test(panNumber)) {
+      setError("Please enter a valid 10-character PAN.");
       return;
     }
     if (!aadhaarImage) {
@@ -255,7 +295,7 @@ function OnboardingContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">
       {/* Header */}
       <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <Image
@@ -263,7 +303,7 @@ function OnboardingContent() {
           alt="Budget Travel Packages"
           width={140}
           height={50}
-          className="h-8 w-auto object-contain"
+          className="h-16 w-auto object-contain"
           priority
         />
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -274,39 +314,54 @@ function OnboardingContent() {
       {/* Stepper */}
       <div className="px-6 py-6 border-b border-slate-50">
         <div className="flex items-center justify-center gap-0 max-w-sm mx-auto">
-          {steps.map((s, i) => (
-            <div key={s.num} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${
-                    step >= s.num
-                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-                      : "bg-slate-100 text-slate-400"
-                  }`}
-                >
-                  <s.icon className="h-4 w-4" />
+          {steps.map((s, i) => {
+            const isActive = step === s.num;
+            const isDone = step > s.num;
+            const Icon = s.icon;
+
+            return (
+              <React.Fragment key={s.num}>
+                {s.num > 1 && (
+                  <div
+                    className={`h-0.5 w-12 mx-2 rounded-full transition-colors duration-500 ${
+                      isDone ? "bg-emerald-500" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+                <div className="flex flex-col items-center gap-2 group">
+                  <div
+                    className={`h-11 w-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+                      isActive
+                        ? "bg-emerald-600 text-white ring-4 ring-emerald-500/15"
+                        : isDone
+                          ? "bg-emerald-500 text-white"
+                          : "bg-white text-slate-400 border border-slate-200"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-5 w-5 ${isActive ? "animate-pulse" : ""}`}
+                    />
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                      isActive ? "text-emerald-700" : "text-slate-400"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
                 </div>
-                <span
-                  className={`text-[10px] mt-1.5 font-semibold ${step >= s.num ? "text-emerald-700" : "text-slate-400"}`}
-                >
-                  {s.label}
-                </span>
-              </div>
-              {i < steps.length - 1 && (
-                <div
-                  className={`w-16 h-0.5 mx-2 mb-4 rounded-full transition-all ${step > s.num ? "bg-emerald-500" : "bg-slate-200"}`}
-                />
-              )}
-            </div>
-          ))}
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-8">
-        <div className="max-w-lg mx-auto">
+      <div className="flex-1 overflow-y-auto max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 p-8 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-8 rounded-2xl border border-red-100 bg-red-50/50 px-5 py-4 text-sm text-red-600 font-medium flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               {error}
             </div>
           )}
@@ -314,12 +369,14 @@ function OnboardingContent() {
           {/* STEP 1: Personal Details */}
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Personal Details
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Fill in your basic information to get started.
-              </p>
+              <div className="mb-10 text-center">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Personal Details
+                </h1>
+                <p className="text-slate-500 mt-2 text-sm font-medium">
+                  Start your journey with us by providing basic info.
+                </p>
+              </div>
 
               <Form {...personalForm}>
                 <form
@@ -367,77 +424,97 @@ function OnboardingContent() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={personalForm.control}
-                      name="gender"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-gray-700">
-                            Gender
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <FormField
+                          control={personalForm.control}
+                          name="gender"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold text-gray-700">
+                                Gender
+                              </FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="py-5 rounded-xl w-full bg-white">
+                                    <SelectValue placeholder="Select" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="male">Male</SelectItem>
+                                  <SelectItem value="female">Female</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <FormField
+                          control={personalForm.control}
+                          name="age"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold text-gray-700">
+                                Age
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  min={18}
+                                  placeholder="25"
+                                  className="h-11 rounded-xl text-slate-900 bg-white"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <FormField
+                        control={personalForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-semibold text-gray-700">
+                              Phone Number
+                            </FormLabel>
                             <FormControl>
-                              <SelectTrigger className="h-11 rounded-xl">
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
+                              <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 font-medium text-slate-500 flex items-center gap-2 select-none pointer-events-none border-r border-slate-200 pr-2 h-5">
+                                  <Image
+                                    src="/images/flag/india.jpg"
+                                    alt="India"
+                                    width={20}
+                                    height={14}
+                                    className="rounded-sm object-cover"
+                                  />
+                                  <span className="text-sm">+91</span>
+                                </div>
+                                <Input
+                                  {...field}
+                                  type="tel"
+                                  maxLength={10}
+                                  placeholder="9876543210"
+                                  className="h-11 rounded-xl pl-20 text-slate-900 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all font-medium"
+                                />
+                              </div>
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={personalForm.control}
-                      name="age"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-gray-700">
-                            Age
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="number"
-                              min={18}
-                              placeholder="25"
-                              className="h-11 rounded-xl text-slate-900"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
-
-                  <FormField
-                    control={personalForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">
-                          Phone Number
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="tel"
-                            placeholder="+91 9876543210"
-                            className="h-11 rounded-xl text-slate-900"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={personalForm.control}
@@ -461,10 +538,10 @@ function OnboardingContent() {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl mt-4"
+                    className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] group mt-6"
                   >
                     Next: Documents
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </form>
               </Form>
@@ -474,72 +551,107 @@ function OnboardingContent() {
           {/* STEP 2: Documents */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Identity Documents
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Use your camera to capture photos of your documents. No file
-                uploads — camera only.
-              </p>
+              <div className="mb-10 text-center">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Identity Verification
+                </h1>
+                <p className="text-slate-500 mt-2 text-sm font-medium">
+                  Help us verify your identity for a secure platform.
+                </p>
+              </div>
 
-              <div className="space-y-6">
+              <div className="mb-8 p-4 rounded-xl bg-amber-50/50 border border-amber-100 flex items-start gap-3">
+                <div className="text-amber-600 text-lg mt-0.5 font-bold">
+                  ⚠️
+                </div>
+                <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                  Please provide clear photos of your documents. Use your camera
+                  to capture them directly. No manual uploads allowed.
+                </p>
+              </div>
+
+              <div className="grid gap-6">
                 {/* Aadhaar */}
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-700">
-                    Aadhaar Number
-                  </label>
-                  <Input
-                    value={aadhaarNumber}
-                    onChange={(e) => setAadhaarNumber(e.target.value)}
-                    placeholder="1234 5678 9012"
-                    maxLength={14}
-                    className="h-11 rounded-xl text-slate-900"
-                  />
-                  <CameraCapture
-                    label="Capture Aadhaar Card"
-                    onCapture={setAadhaarImage}
-                    capturedImage={aadhaarImage}
-                    autoStart={true}
-                  />
+                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-sm">
+                      1
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">
+                        Aadhaar Card
+                      </h3>
+                      <p className="text-[10px] text-slate-500">
+                        12-digit UIDAI number
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Input
+                      value={formatAadhaar(aadhaarNumber)}
+                      onChange={handleAadhaarChange}
+                      placeholder="0000 0000 0000"
+                      className="h-12 text-lg font-bold tracking-widest text-center rounded-xl bg-slate-50 border-slate-200 focus:border-emerald-500"
+                    />
+                    <CameraCapture
+                      label="Capture Aadhaar Front"
+                      onCapture={setAadhaarImage}
+                      capturedImage={aadhaarImage}
+                      autoStart={true}
+                    />
+                  </div>
                 </div>
 
                 {/* PAN */}
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-700">
-                    PAN Number
-                  </label>
-                  <Input
-                    value={panNumber}
-                    onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
-                    placeholder="ABCDE1234F"
-                    maxLength={10}
-                    className="h-11 rounded-xl text-slate-900"
-                  />
-                  <CameraCapture
-                    label="Capture PAN Card"
-                    onCapture={setPanImage}
-                    capturedImage={panImage}
-                  />
+                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-sm">
+                      2
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">
+                        PAN Card
+                      </h3>
+                      <p className="text-[10px] text-slate-500">
+                        10-char Alphanumeric
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Input
+                      value={panNumber}
+                      onChange={(e) =>
+                        setPanNumber(e.target.value.toUpperCase().slice(0, 10))
+                      }
+                      placeholder="ABCDE1234F"
+                      className="h-12 text-lg font-bold tracking-widest text-center rounded-xl bg-slate-50 border-slate-200 focus:border-emerald-500 uppercase"
+                    />
+                    <CameraCapture
+                      label="Capture PAN Front"
+                      onCapture={setPanImage}
+                      capturedImage={panImage}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-4 mt-8">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="flex-1 h-12 rounded-xl"
+                  className="flex-1 h-14 rounded-2xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  <ArrowLeft className="h-5 w-5 mr-2" />
                   Back
                 </Button>
                 <Button
                   type="button"
                   onClick={handleStep2Next}
-                  className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl"
+                  className="flex-[1.5] h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] group"
                 >
-                  Next: Face Verify
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  Next: Security
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </div>
@@ -548,12 +660,14 @@ function OnboardingContent() {
           {/* STEP 3: Face + Password + Submit */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Face Verification & Password
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Take a clear photo of your face and set your login password.
-              </p>
+              <div className="mb-10 text-center">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Account Security
+                </h1>
+                <p className="text-slate-500 mt-2 text-sm font-medium">
+                  Take a clear photo of your face and set your secure password.
+                </p>
+              </div>
 
               <div className="space-y-6">
                 <CameraCapture
@@ -623,28 +737,28 @@ function OnboardingContent() {
                         )}
                       />
 
-                      <div className="flex gap-3 mt-4">
+                      <div className="flex gap-4 mt-8">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => setStep(2)}
-                          className="flex-1 h-12 rounded-xl"
+                          className="flex-1 h-14 rounded-2xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
                           disabled={isLoading}
                         >
-                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          <ArrowLeft className="h-5 w-5 mr-2" />
                           Back
                         </Button>
                         <Button
                           type="submit"
                           disabled={isLoading}
-                          className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20"
+                          className="flex-[1.5] h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] group"
                         >
                           {isLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          ) : null}
-                          {isLoading
-                            ? "Submitting..."
-                            : "Complete Registration"}
+                            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                          ) : (
+                            <CheckCircle2 className="h-5 w-5 mr-2" />
+                          )}
+                          {isLoading ? "Submitting..." : "Complete Setup"}
                         </Button>
                       </div>
                     </form>

@@ -18,6 +18,14 @@ interface LeadListItem {
   agentId?: { _id: string; name: string; email: string } | null;
   createdAt: string;
   updatedAt: string;
+  stageUpdatedAt?: string;
+  bookingPayments?: Array<{
+    _id: string;
+    amount: number;
+    status: string;
+    type: string;
+    transactionId?: string;
+  }>;
 }
 
 interface LeadQuery {
@@ -25,6 +33,7 @@ interface LeadQuery {
   stage?: string | { $ne: string } | { $in: string[] };
   tripType?: string;
   $or?: Array<Record<string, unknown>>;
+  _id?: any;
 }
 
 import { Badge } from "@/components/ui/badge";
@@ -41,8 +50,8 @@ import { LeadTable } from "@/components/admin/leads/LeadTable";
 import User from "@/lib/db/models/User";
 
 export const metadata: Metadata = {
-  title: "Lead Management | Budget Travel Packages",
-  description: "Manage travel leads and pipeline",
+  title: "Inquiry Management | Budget Travel Packages",
+  description: "Manage travel inquiries and pipeline",
 };
 
 const LEADS_PER_PAGE = 20;
@@ -69,7 +78,7 @@ export default async function LeadsPage({
   if (session.user.role === "agent") {
     query.agentId = session.user.id;
 
-    if (stageFilter && stageFilter !== "all") {
+    if (view !== "board" && stageFilter && stageFilter !== "all") {
       // If agent tries to filter for 'won', they get nothing (security/archival)
       if (stageFilter === "won") {
         query.stage = "_none_"; // Force empty result
@@ -77,12 +86,13 @@ export default async function LeadsPage({
         query.stage = stageFilter;
       }
     } else {
-      // Default view for agents excludes won
+      // Default view for agents excludes won (also for broad board view)
       query.stage = { $ne: "won" };
     }
   } else {
     // Admin path
-    if (stageFilter && stageFilter !== "all") {
+    // Reset stage filter for board view
+    if (view !== "board" && stageFilter && stageFilter !== "all") {
       query.stage = stageFilter;
     }
   }
@@ -92,11 +102,13 @@ export default async function LeadsPage({
   }
 
   if (search) {
-    query.$or = [
-      { "travelers.name": { $regex: search, $options: "i" } },
-      { "travelers.phone": { $regex: search, $options: "i" } },
-      { destination: { $regex: search, $options: "i" } },
-    ];
+    const mongoose = (await import("mongoose")).default;
+    if (mongoose.Types.ObjectId.isValid(search)) {
+      query._id = new mongoose.Types.ObjectId(search);
+    } else {
+      // If search term is provided but not a valid ID, trigger empty results
+      query._id = new mongoose.Types.ObjectId(); // Non-existent ID
+    }
   }
 
   // Fetch agents for bulk actions (Admin only)
@@ -143,6 +155,8 @@ export default async function LeadsPage({
       travelers: lead.travelers || [],
       createdAt: String(lead.createdAt),
       updatedAt: String(lead.updatedAt),
+      stageUpdatedAt: lead.stageUpdatedAt ? String(lead.stageUpdatedAt) : String(lead.updatedAt),
+      bookingPayments: lead.bookingPayments as any,
     }),
   );
 
@@ -165,15 +179,15 @@ export default async function LeadsPage({
       <SmartAutoRefresh interval={30000} idleThreshold={60000} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Leads</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Inquiries</h2>
           <p className="text-muted-foreground">
             {session.user.role === "admin"
               ? "Manage all travel inquiries and assigning agents."
-              : "Track and manage your assigned leads."}
+              : "Track and manage your assigned inquiries."}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CreateLeadDialog />
+          {session.user.role === "admin" && <CreateLeadDialog />}
         </div>
       </div>
 
@@ -221,7 +235,7 @@ export default async function LeadsPage({
                 <span className="font-medium">
                   {Math.min(page * LEADS_PER_PAGE, totalCount)}
                 </span>{" "}
-                of <span className="font-medium">{totalCount}</span> leads
+                of <span className="font-medium">{totalCount}</span> inquiries
               </p>
 
               <div className="flex items-center gap-2">

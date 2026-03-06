@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { createNotification } from "@/lib/notifications";
+import { sendLeadAssignmentEmail } from "@/lib/email";
 
 // ============ AUTH HELPER ============
 
@@ -41,8 +42,7 @@ const createLeadSchema = z.object({
     .max(50, "Maximum 50 guests"),
   budget: z.coerce.number().min(1, "Budget must be at least 1"),
   specialRequests: z.string().max(500).optional().default(""),
-  // Support for multiple travelers via JSON string
-  travelersJSON: z.string().min(1, "Traveler data is required"),
+  customerId: z.string().min(1, "Customer selection is required"),
 });
 
 // ============ SERVER ACTIONS ============
@@ -51,6 +51,13 @@ export async function createLead(prevState: unknown, formData: FormData) {
   try {
     const session = await verifySession();
     await connectDB();
+
+    if (session.user.role !== "admin") {
+      return {
+        success: false,
+        error: "Only administrators can create manual inquiries.",
+      };
+    }
 
     // Extract raw form data
     const rawData = {
@@ -62,7 +69,7 @@ export async function createLead(prevState: unknown, formData: FormData) {
       guests: formData.get("guests"),
       budget: formData.get("budget"),
       specialRequests: formData.get("specialRequests") || "",
-      travelersJSON: formData.get("travelers"), // JSON string from client
+      customerId: formData.get("customerId"),
     };
 
     // Validate with Zod
@@ -79,14 +86,51 @@ export async function createLead(prevState: unknown, formData: FormData) {
     }
 
     const validated = validation.data;
-    let travelers = [];
-    try {
-      travelers = JSON.parse(validated.travelersJSON);
-      if (!Array.isArray(travelers) || travelers.length === 0) {
-        throw new Error("At least one traveler is required");
-      }
-    } catch (e) {
-      return { success: false, error: "Invalid traveler data format" };
+    let travelers: any[] = [];
+    let isPlatformUser = false;
+    let isContact = false;
+
+    if (validated.customerId) {
+        // First try to find a platform User
+        let customer = await User.findById(validated.customerId).lean();
+        
+        if (customer) {
+            isPlatformUser = true;
+            // Populate primary traveler from User data
+            travelers = [
+                {
+                    name: customer.name || "Unknown",
+                    email: customer.email,
+                    phone: customer.phone,
+                    age: (customer as any).age || 30, // Default age if not set
+                    gender: (customer as any).gender || "other",
+                },
+            ];
+        } else {
+            // If not found in User, try Contact collection
+            // We import Contact dynamically to avoid circular dependencies if any
+            const Contact = mongoose.models.Contact || mongoose.model("Contact");
+            let contact = await Contact.findById(validated.customerId).lean();
+            if (contact) {
+                isContact = true;
+                travelers = [
+                {
+                    name: contact.name || "Unknown",
+                    email: contact.email,
+                    phone: contact.phone,
+                    age: 30, // Default age
+                    gender: "other", // Default gender
+                },
+                ];
+            } else {
+                return { success: false, error: "Customer/Contact not found" };
+            }
+        }
+    } else {
+       return {
+          success: false,
+          error: "Customer or Contact ID is required",
+        };
     }
 
     // Build lead document
@@ -99,6 +143,8 @@ export async function createLead(prevState: unknown, formData: FormData) {
       guests: validated.guests,
       budget: validated.budget,
       specialRequests: validated.specialRequests,
+      customerId: isPlatformUser ? validated.customerId : undefined,
+      contactId: isContact ? validated.customerId : undefined,
       travelers: travelers.map((t: any) => ({
         name: t.name,
         email: t.email || undefined,
@@ -114,10 +160,9 @@ export async function createLead(prevState: unknown, formData: FormData) {
         },
       })),
       source: "manual" as const,
-      agentId: session.user.role === "agent" ? session.user.id : undefined,
+      agentId: undefined, // Manual inquiries by admins are unassigned by default
       lastActivityAt: new Date(),
     };
-
     const newLead = await Lead.create(leadData);
 
     // Log activity
@@ -156,12 +201,12 @@ export async function updateLeadStage(leadId: string, newStage: string) {
     const validStages = [
       "new",
       "contacted",
-      "qualified",
+      "booked",
       "proposal_sent",
       "negotiation",
       "won",
-      "lost",
-      "stale",
+      "dropped",
+      "abandoned",
     ];
     if (!validStages.includes(newStage)) {
       return { success: false, error: "Invalid stage value" };
@@ -201,6 +246,14 @@ export async function updateLeadStage(leadId: string, newStage: string) {
             "Travel Documents/Tickets must be uploaded before marking as Won.",
         };
       }
+
+      // 4. Check Payment Status
+      if (lead.paymentStatus !== "paid") {
+        return {
+          success: false,
+          error: "The trip must be fully paid before it can be marked as Won.",
+        };
+      }
     }
 
     const previousStage = lead.stage;
@@ -215,7 +268,7 @@ export async function updateLeadStage(leadId: string, newStage: string) {
     await logLeadActivity({
       leadId,
       userId: session?.user?.id,
-      action: newStage === "stale" ? "auto_stale" : "stage_changed",
+      action: newStage === "abandoned" ? "auto_abandon" : "stage_changed",
       fromStage: previousStage,
       toStage: newStage,
       details: `Stage changed from ${previousStage} to ${newStage}`,
@@ -255,13 +308,15 @@ export async function assignAgent(leadId: string, agentId: string) {
     const isUnassigning =
       !agentId || agentId === "unassigned" || agentId === "";
 
+    let targetUser: any = null;
+
     if (!isUnassigning) {
       if (!mongoose.Types.ObjectId.isValid(agentId)) {
         return { success: false, error: "Invalid agent ID" };
       }
 
       // Ensure the target is an agent or an admin
-      const targetUser = await User.findById(agentId);
+      targetUser = await User.findById(agentId);
       if (!targetUser || !["agent", "admin"].includes(targetUser.role)) {
         return {
           success: false,
@@ -300,6 +355,14 @@ export async function assignAgent(leadId: string, agentId: string) {
         message: "You have been assigned a new lead.",
         type: "info",
         link: `/admin/leads/${leadId}`,
+      });
+
+      // Send Email Notification
+      await sendLeadAssignmentEmail({
+        agentName: targetUser!.name,
+        agentEmail: targetUser!.email,
+        leadCount: 1,
+        leadUrl: `${process.env.NEXTAUTH_URL}/admin/leads/${leadId}`,
       });
     }
 
@@ -363,17 +426,19 @@ export async function bulkAssignAgents(leadIds: string[], agentId: string) {
     const isUnassigning =
       !agentId || agentId === "unassigned" || agentId === "";
 
+    let targetAgent: any = null;
+
     if (!isUnassigning) {
       if (!mongoose.Types.ObjectId.isValid(agentId)) {
         return { success: false, error: "Invalid agent ID" };
       }
 
-      const agent = await User.findById(agentId);
-      if (!agent || agent.role !== "agent") {
+      targetAgent = await User.findById(agentId);
+      if (!targetAgent || targetAgent.role !== "agent") {
         return { success: false, error: "Target user is not an agent" };
       }
 
-      if (!agent.isVerified) {
+      if (!targetAgent.isVerified) {
         return {
           success: false,
           error: "Only verified agents can be assigned to leads.",
@@ -411,6 +476,14 @@ export async function bulkAssignAgents(leadIds: string[], agentId: string) {
         message: `You have been assigned ${leadIds.length} new leads.`,
         type: "info",
         link: `/admin/leads`,
+      });
+
+      // Send Email Notification
+      await sendLeadAssignmentEmail({
+        agentName: targetAgent!.name,
+        agentEmail: targetAgent!.email,
+        leadCount: leadIds.length,
+        leadUrl: `${process.env.NEXTAUTH_URL}/admin/leads`,
       });
     }
 
@@ -516,5 +589,133 @@ export async function addLeadComment(leadId: string, text: string) {
     const message =
       error instanceof Error ? error.message : "Failed to add comment";
     return { success: false, error: message };
+  }
+}
+
+export async function updateLeadComment(
+  leadId: string,
+  commentId: string,
+  text: string,
+) {
+  try {
+    await verifySession();
+    await connectDB();
+
+    if (
+      !mongoose.Types.ObjectId.isValid(leadId) ||
+      !mongoose.Types.ObjectId.isValid(commentId)
+    ) {
+      return { success: false, error: "Invalid IDs" };
+    }
+
+    if (!text || text.trim().length === 0) {
+      return { success: false, error: "Comment text cannot be empty" };
+    }
+
+    const lead = await Lead.findById(leadId);
+    if (!lead) return { success: false, error: "Lead not found" };
+
+    const comment = (lead.comments as any[]).find(
+      (c) => c._id.toString() === commentId,
+    );
+    if (!comment) return { success: false, error: "Comment not found" };
+
+    comment.text = text.trim();
+    lead.lastActivityAt = new Date();
+    await lead.save();
+
+    revalidatePath(`/admin/leads/${leadId}`);
+
+    return { success: true, message: "Comment updated successfully." };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update comment";
+    return { success: false, error: message };
+  }
+}
+
+export async function deleteLeadComment(leadId: string, commentId: string) {
+  try {
+    await verifySession();
+    await connectDB();
+
+    if (
+      !mongoose.Types.ObjectId.isValid(leadId) ||
+      !mongoose.Types.ObjectId.isValid(commentId)
+    ) {
+      return { success: false, error: "Invalid IDs" };
+    }
+
+    const lead = await Lead.findById(leadId);
+    if (!lead) return { success: false, error: "Lead not found" };
+
+    lead.comments = (lead.comments as any[]).filter(
+      (c) => c._id.toString() !== commentId,
+    );
+
+    lead.lastActivityAt = new Date();
+    await lead.save();
+
+    revalidatePath(`/admin/leads/${leadId}`);
+
+    return { success: true, message: "Comment deleted successfully." };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete comment";
+    return { success: false, error: message };
+  }
+}
+
+export async function getCustomers(search: string = "") {
+  try {
+    const session = await verifySession();
+    await connectDB();
+
+    if (session.user.role === "admin") {
+        // Admins see all platform users
+        const query: any = { role: "customer" };
+        if (search) {
+        query.$or = [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+        ];
+        }
+
+        const customers = await User.find(query)
+        .select("_id name email phone")
+        .sort({ name: 1 })
+        .limit(10)
+        .lean();
+
+        return {
+        success: true,
+        customers: JSON.parse(JSON.stringify(customers)),
+        };
+    } else {
+        // Agents see their address book contacts
+        // We import Contact dynamically to avoid circular deps
+        const Contact = mongoose.models.Contact || mongoose.model("Contact");
+        const query: any = { agentId: session.user.id };
+        if (search) {
+        query.$or = [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+        ];
+        }
+
+        const contacts = await Contact.find(query)
+        .select("_id name email phone")
+        .sort({ name: 1 })
+        .limit(10)
+        .lean();
+
+        return {
+        success: true,
+        customers: JSON.parse(JSON.stringify(contacts)),
+        };
+    }
+  } catch (error) {
+    console.error("Get customers/contacts error:", error);
+    return { success: false, error: "Failed to fetch customers from your contacts list" };
   }
 }

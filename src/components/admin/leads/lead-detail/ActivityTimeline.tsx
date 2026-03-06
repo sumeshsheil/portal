@@ -41,15 +41,15 @@ const ACTION_CONFIG: Record<
     color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30",
     label: "Agent Unassigned",
   },
-  auto_stale: {
+  auto_abandon: {
     icon: AlertTriangle,
     color: "text-amber-600 bg-amber-100 dark:bg-amber-900/30",
-    label: "Auto-Stale",
+    label: "Auto-Abandoned",
   },
-  stale_recovered: {
+  abandon_recovered: {
     icon: ArrowRight,
     color: "text-green-600 bg-green-100 dark:bg-green-900/30",
-    label: "Recovered from Stale",
+    label: "Recovered from Abandoned",
   },
   note_added: {
     icon: PlusCircle,

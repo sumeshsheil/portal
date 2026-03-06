@@ -41,10 +41,10 @@ interface ActionButtonsProps {
 const STAGES = [
   "new",
   "contacted",
-  "qualified",
+  "booked",
   "proposal_sent",
   "negotiation",
-  "lost",
+  "dropped",
 ];
 
 export function ActionButtons({
@@ -62,6 +62,7 @@ export function ActionButtons({
   const [loading, setLoading] = useState(false);
 
   const isWon = currentStage === "won";
+  const isAbandoned = currentStage === "abandoned";
 
   async function handleStageChange(newStage: string) {
     if (newStage === currentStage) return;
@@ -83,7 +84,7 @@ export function ActionButtons({
   async function handleMarkAsWon() {
     if (!isReadyToWin) {
       toast.error(
-        "Please ensure Trip Cost is set and all documents are uploaded.",
+        "Please ensure Trip Cost is set, all documents are uploaded, and the trip is Fully Paid.",
       );
       return;
     }
@@ -121,7 +122,7 @@ export function ActionButtons({
 
   return (
     <div className="space-y-6">
-      {!isWon && (
+      {!isWon && !isAbandoned && (
         <div className="space-y-3">
           {/* Admin Self-Assignment Button */}
           {isAdmin && agentId !== currentUserId && (
@@ -157,8 +158,9 @@ export function ActionButtons({
             <div className="flex items-start gap-2 p-2.5 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" />
               <p className="text-[11px] leading-tight text-amber-700 dark:text-amber-400">
-                To enable <strong>Won</strong>, ensure Trip Cost is set and both
-                Itinerary & Documents are uploaded.
+                To enable <strong>Won</strong>, ensure Trip Cost is set,
+                Itinerary & Documents are uploaded, and the trip is{" "}
+                <strong>Fully Paid</strong>.
               </p>
             </div>
           )}
@@ -184,9 +186,23 @@ export function ActionButtons({
             </Button>
             <p className="text-[10px] text-muted-foreground mt-1.5 text-center px-2">
               Reset the auto-abandon countdown to prevent this lead from going
-              stale.
+              abandoned.
             </p>
           </div>
+        </div>
+      )}
+
+      {isAbandoned && (
+        <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center space-y-2">
+          <div className="h-10 w-10 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+            This Lead is Abandoned
+          </p>
+          <p className="text-[11px] text-amber-600 dark:text-amber-400">
+            Change the pipeline stage below to revive it.
+          </p>
         </div>
       )}
 
@@ -214,7 +230,7 @@ export function ActionButtons({
           <SelectTrigger className="w-full capitalize bg-background">
             <SelectValue placeholder="Select stage" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             {STAGES.map((s) => (
               <SelectItem
                 key={s}
@@ -222,12 +238,20 @@ export function ActionButtons({
                 className="capitalize"
                 disabled={s === "won"}
               >
-                {s.replace("_", " ")}
+                {s === "new"
+                  ? "Inquiry Received"
+                  : s === "contacted"
+                    ? "Under Review"
+                    : s === "proposal_sent"
+                      ? "Proposal Ready"
+                      : s === "negotiation"
+                        ? "Finalizing"
+                        : s.replace("_", " ")}
               </SelectItem>
             ))}
             {isWon && (
               <SelectItem value="won" className="capitalize">
-                Won
+                Trip Confirmed
               </SelectItem>
             )}
           </SelectContent>
@@ -245,7 +269,7 @@ export function ActionButtons({
             <SelectTrigger className="w-full bg-background">
               <SelectValue placeholder="Assign agent" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper">
               <SelectItem
                 value="unassigned"
                 className="text-muted-foreground italic"

@@ -1,5 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Traveler } from "@/components/landing/sections/booking/types";
+
+export interface Traveler {
+  firstName: string;
+  lastName: string;
+  age: number;
+  gender: string;
+  email: string;
+  phone: string;
+}
 
 // ============ STATE TYPES ============
 

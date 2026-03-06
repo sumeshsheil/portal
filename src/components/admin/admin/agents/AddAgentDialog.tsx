@@ -70,7 +70,7 @@ export function AddAgentDialog() {
         setOpen(false);
         form.reset();
       } else {
-        toast.error(result.error || "Failed to create agent");
+        toast.error(result.error || "Failed to create travel partner");
         if (result.fieldErrors) {
           // Handle field errors if returned from server action
           // Not implemented in this simple version, rely on toast for main error
@@ -88,14 +88,14 @@ export function AddAgentDialog() {
       <DialogTrigger asChild>
         <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
           <Plus className="mr-2 h-4 w-4" />
-          Add Agent
+          Add Partner
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Agent</DialogTitle>
+          <DialogTitle>Add New Travel Partner</DialogTitle>
           <DialogDescription>
-            Create a new agent account. They will receive an email with login
+            Create a new travel partner account. They will receive an email with login
             credentials.
           </DialogDescription>
         </DialogHeader>

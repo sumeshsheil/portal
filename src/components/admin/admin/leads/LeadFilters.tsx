@@ -38,12 +38,12 @@ export function LeadFilters() {
           <SelectItem value="all">All Stages</SelectItem>
           <SelectItem value="new">New</SelectItem>
           <SelectItem value="contacted">Contacted</SelectItem>
-          <SelectItem value="qualified">Qualified</SelectItem>
+          <SelectItem value="booked">Booked</SelectItem>
           <SelectItem value="proposal_sent">Proposal Sent</SelectItem>
           <SelectItem value="negotiation">Negotiation</SelectItem>
           <SelectItem value="won">Won</SelectItem>
-          <SelectItem value="lost">Lost</SelectItem>
-          <SelectItem value="stale">Stale</SelectItem>
+          <SelectItem value="dropped">Dropped</SelectItem>
+          <SelectItem value="abandoned">Abandoned</SelectItem>
         </SelectContent>
       </Select>
     </div>

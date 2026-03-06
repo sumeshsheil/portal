@@ -200,7 +200,7 @@ export function TripInfoManager({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="budget">Total Budget (₹)</Label>
+                <Label htmlFor="budget">Budget (₹)</Label>
                 <Input
                   id="budget"
                   name="budget"
@@ -208,11 +208,13 @@ export function TripInfoManager({
                   min={1}
                   defaultValue={budget}
                   required
+                  disabled
                 />
               </div>
+              <div></div>
 
               <div className="space-y-2">
-                <Label htmlFor="netAmount">Net Amount (Actual Price) ₹</Label>
+                <Label htmlFor="netAmount">Net ₹</Label>
                 <Input
                   id="netAmount"
                   name="netAmount"
@@ -226,7 +228,7 @@ export function TripInfoManager({
 
               <div className="space-y-2">
                 <Label htmlFor="tripProfit">
-                  Trip Profit (Company Margin) ₹
+                  Profit ₹
                 </Label>
                 <Input
                   id="tripProfit"

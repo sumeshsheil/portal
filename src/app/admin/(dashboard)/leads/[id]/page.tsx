@@ -4,13 +4,10 @@ import { format } from "date-fns";
 import {
   ArrowLeft,
   MapPin,
-  Calendar,
   Mail,
   Phone,
-  Banknote,
   Users,
   AlertTriangle,
-  FileText,
 } from "lucide-react";
 
 import { connectDB } from "@/lib/db/mongoose";
@@ -33,9 +30,11 @@ import { ActivityTimeline } from "@/components/admin/leads/lead-detail/ActivityT
 import { DocumentManager } from "@/components/admin/leads/lead-detail/DocumentManager";
 import { ItineraryManager } from "@/components/admin/leads/lead-detail/ItineraryManager";
 import { TripInfoManager } from "@/components/admin/leads/lead-detail/TripInfoManager";
+import { PaymentManager } from "@/components/admin/leads/lead-detail/PaymentManager";
 import { AgentIdentityCard } from "@/components/admin/leads/lead-detail/AgentIdentityCard";
 import { CustomerHistoryCard } from "@/components/admin/leads/lead-detail/CustomerHistoryCard";
 import { LeadCommentsCard } from "@/components/admin/leads/lead-detail/LeadCommentsCard";
+import { CopyableBadge } from "@/components/admin/leads/lead-detail/CopyableBadge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getLeadActivities } from "./activity-actions";
 
@@ -71,9 +70,12 @@ export default async function LeadDetailPage({
   const lead = await Lead.findById(id)
     .populate(
       "agentId",
-      "name email aadhaarNumber panNumber documents isVerified",
+      "name email aadhaarNumber passportNumber panNumber documents isVerified",
     )
-    .populate("customerId", "aadhaarNumber panNumber documents members")
+    .populate(
+      "customerId",
+      "aadhaarNumber passportNumber panNumber documents members",
+    )
     .lean();
 
   if (!lead) return notFound();
@@ -90,7 +92,7 @@ export default async function LeadDetailPage({
           You are not authorized to view this lead details.
         </p>
         <Button asChild>
-          <Link href="/admin/leads">Return to Leads</Link>
+          <Link href="/admin/leads">Return to Inquiries</Link>
         </Button>
       </div>
     );
@@ -140,7 +142,8 @@ export default async function LeadDetailPage({
   const isReadyToWin =
     (lead.tripCost || 0) > 0 &&
     (itinerary.length > 0 || !!lead.itineraryPdfUrl) &&
-    (documents.length > 0 || !!lead.travelDocumentsPdfUrl);
+    (documents.length > 0 || !!lead.travelDocumentsPdfUrl) &&
+    lead.paymentStatus === "paid";
 
   // Fetch ALL leads for this customer to calculate aggregate stats (Admin only)
   let customerHistoryData = null;
@@ -156,7 +159,7 @@ export default async function LeadDetailPage({
       (acc, l) => {
         acc.totalLeads++;
         if (l.stage === "won") acc.wonTrips++;
-        if (l.stage === "lost") acc.lostTrips++;
+        if (l.stage === "dropped") acc.lostTrips++;
         if (l.tripProfit) acc.totalEarnings += l.tripProfit;
         return acc;
       },
@@ -179,7 +182,17 @@ export default async function LeadDetailPage({
               {lead.travelers?.[0]?.name || "Unknown Traveler"}
             </h1>
             <Badge variant="outline" className="capitalize ml-2">
-              {lead.stage.replace("_", " ")}
+              {lead.stage === "new"
+                ? "Inquiry Received"
+                : lead.stage === "contacted"
+                  ? "Under Review"
+                  : lead.stage === "proposal_sent"
+                    ? "Proposal Ready"
+                    : lead.stage === "negotiation"
+                      ? "Finalizing"
+                      : lead.stage === "won"
+                        ? "Trip Confirmed"
+                        : lead.stage.replace("_", " ")}
             </Badge>
           </div>
           <div className="text-muted-foreground flex items-center gap-2 text-sm mt-1">
@@ -302,6 +315,7 @@ export default async function LeadDetailPage({
                       let personDocs: any = null;
                       const t = traveler as any;
                       let personAadhaar = t.aadhaarNumber || "";
+                      let personPassportNumber = t.passportNumber || "";
                       let personPan = t.panNumber || "";
 
                       if (idx === 0 && customer) {
@@ -309,6 +323,8 @@ export default async function LeadDetailPage({
                         personDocs = customer.documents;
                         personAadhaar =
                           personAadhaar || customer.aadhaarNumber || "";
+                        personPassportNumber =
+                          personPassportNumber || customer.passportNumber || "";
                         personPan = personPan || customer.panNumber || "";
                       } else if (t.memberId && customer?.members) {
                         // Companion linked to a member
@@ -321,6 +337,8 @@ export default async function LeadDetailPage({
                           personDocs = member.documents;
                           personAadhaar =
                             personAadhaar || member.aadhaarNumber || "";
+                          personPassportNumber =
+                            personPassportNumber || member.passportNumber || "";
                           // For members, PAN might be in documents
                         }
                       }
@@ -352,6 +370,7 @@ export default async function LeadDetailPage({
 
                       if (
                         !personAadhaar &&
+                        !personPassportNumber &&
                         !personPan &&
                         !hasAadhaar &&
                         !hasPassport &&
@@ -388,60 +407,28 @@ export default async function LeadDetailPage({
                             </p>
                             <div className="flex flex-wrap gap-2 text-[10px]">
                               {(personAadhaar || hasAadhaar) && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 gap-1 font-normal py-0.5"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  {aadhaarUrl ? (
-                                    <a
-                                      href={aadhaarUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="hover:underline"
-                                    >
-                                      Aadhaar: {personAadhaar || "Uploaded"}
-                                    </a>
-                                  ) : (
-                                    <span>Aadhaar: {personAadhaar}</span>
-                                  )}
-                                </Badge>
+                                <CopyableBadge
+                                  label="Aadhaar"
+                                  value={personAadhaar}
+                                  url={aadhaarUrl}
+                                  className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100"
+                                />
                               )}
-                              {hasPassport && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 gap-1 font-normal py-0.5"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  <a
-                                    href={passportUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:underline"
-                                  >
-                                    Passport
-                                  </a>
-                                </Badge>
+                              {(personPassportNumber || hasPassport) && (
+                                <CopyableBadge
+                                  label="Passport"
+                                  value={personPassportNumber}
+                                  url={passportUrl}
+                                  className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100"
+                                />
                               )}
                               {(personPan || hasPan) && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100 gap-1 font-normal py-0.5"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  {panUrl ? (
-                                    <a
-                                      href={panUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="hover:underline"
-                                    >
-                                      PAN: {personPan || "Uploaded"}
-                                    </a>
-                                  ) : (
-                                    <span>PAN: {personPan}</span>
-                                  )}
-                                </Badge>
+                                <CopyableBadge
+                                  label="PAN"
+                                  value={personPan}
+                                  url={panUrl}
+                                  className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100"
+                                />
                               )}
                             </div>
                           </div>
@@ -469,6 +456,16 @@ export default async function LeadDetailPage({
             itineraryPdfUrl={lead.itineraryPdfUrl}
           />
 
+          {/* Payment Manager */}
+          <PaymentManager
+            leadId={leadId}
+            payments={JSON.parse(JSON.stringify(lead.bookingPayments || []))}
+            tripCost={lead.tripCost || 0}
+            paymentStatus={lead.paymentStatus}
+            customerEmail={lead.travelers?.[0]?.email}
+            isAdmin={session.user.role === "admin"}
+          />
+
           {/* Documents Manager */}
           <DocumentManager
             leadId={leadId}
@@ -492,10 +489,9 @@ export default async function LeadDetailPage({
           {/* Assuming 'lead' and 'isAdmin' are available in scope */}
           {/* <QuickActions lead={lead} /> */}
 
-          {/* Comments Section */}
           <LeadCommentsCard
             leadId={leadId}
-            comments={lead.comments || []}
+            comments={JSON.parse(JSON.stringify(lead.comments || []))}
             disabled={
               !(session.user.role === "admin") &&
               lead.agentId?._id.toString() !== session.user.id
@@ -510,7 +506,7 @@ export default async function LeadDetailPage({
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">
-                Lead Information
+                Inquiry Information
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-3">
@@ -586,7 +582,17 @@ export default async function LeadDetailPage({
                             variant="outline"
                             className="text-[10px] h-5 capitalize"
                           >
-                            {prev.stage.replace("_", " ")}
+                            {prev.stage === "new"
+                              ? "Inquiry Received"
+                              : prev.stage === "contacted"
+                                ? "Under Review"
+                                : prev.stage === "proposal_sent"
+                                  ? "Proposal Ready"
+                                  : prev.stage === "negotiation"
+                                    ? "Finalizing"
+                                    : prev.stage === "won"
+                                      ? "Trip Confirmed"
+                                      : prev.stage.replace("_", " ")}
                           </Badge>
                         </Link>
                       ))}

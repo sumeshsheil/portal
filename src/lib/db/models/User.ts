@@ -21,9 +21,11 @@ export interface IUser extends Document {
   lastName?: string;
   image?: string;
   gender?: "male" | "female" | "other";
+  birthDate?: Date;
   age?: number;
   address?: string;
   aadhaarNumber?: string;
+  passportNumber?: string;
   panNumber?: string;
   documents?: {
     aadharCard: string[];
@@ -35,6 +37,15 @@ export interface IUser extends Document {
   isVerified: boolean;
   isPhoneVerified: boolean;
   members?: IMember[];
+  // Subscription fields
+  plan: "free" | "basic" | "pro" | "premium" | "enterprise";
+  subscriptionStatus: "active" | "expired" | "pending";
+  subscriptionStartDate?: Date;
+  subscriptionEndDate?: Date;
+  billingCycle?: "monthly" | "90days" | "yearly";
+  transactionId?: string;
+  leadCount: number;
+  packageCount: number;
 }
 
 export interface IMember {
@@ -42,6 +53,8 @@ export interface IMember {
   email?: string;
   gender: "male" | "female" | "other";
   age: number;
+  aadhaarNumber?: string;
+  passportNumber?: string;
   documents?: {
     aadharCard: string[];
     passport: string[];
@@ -55,6 +68,8 @@ const MemberSchema = new Schema<IMember>({
   email: { type: String, lowercase: true, trim: true },
   gender: { type: String, enum: ["male", "female", "other"], required: true },
   age: { type: Number, required: true, min: 0, max: 120 },
+  aadhaarNumber: { type: String, trim: true },
+  passportNumber: { type: String, trim: true },
   documents: {
     aadharCard: [{ type: String }],
     passport: [{ type: String }],
@@ -126,9 +141,11 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ["male", "female", "other"],
     },
+    birthDate: { type: Date },
     age: { type: Number },
     address: { type: String, trim: true },
     aadhaarNumber: { type: String, trim: true },
+    passportNumber: { type: String, trim: true },
     panNumber: { type: String, trim: true },
     documents: {
       aadharCard: [{ type: String }],
@@ -156,6 +173,39 @@ const UserSchema = new Schema<IUser>(
         "Cannot exceed 30 members",
       ],
       default: [],
+    },
+    // === SUBSCRIPTION FIELDS ===
+    plan: {
+      type: String,
+      enum: ["free", "basic", "pro", "premium", "enterprise"],
+      default: "free",
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ["active", "expired", "pending"],
+      default: "active",
+    },
+    subscriptionStartDate: {
+      type: Date,
+    },
+    subscriptionEndDate: {
+      type: Date,
+    },
+    billingCycle: {
+      type: String,
+      enum: ["monthly", "90days", "yearly"],
+    },
+    transactionId: {
+      type: String,
+      trim: true,
+    },
+    leadCount: {
+      type: Number,
+      default: 0,
+    },
+    packageCount: {
+      type: Number,
+      default: 0,
     },
   },
   {

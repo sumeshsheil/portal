@@ -255,11 +255,8 @@ export function AdminHeader() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
                 <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 w-fit mt-1 capitalize">
-                  {user?.role}
+                  {user?.role === "agent" ? "Travel Partner" : user?.role}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -267,7 +264,7 @@ export function AdminHeader() {
             <DropdownMenuItem
               onClick={() =>
                 signOut({
-                  callbackUrl: window.location.origin + "/admin/login",
+                  callbackUrl: window.location.origin + "/",
                 })
               }
               className="text-red-600 focus:text-red-600 focus:bg-red-50"

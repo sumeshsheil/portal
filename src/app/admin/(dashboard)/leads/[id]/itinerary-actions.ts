@@ -72,6 +72,9 @@ export async function updateLeadBasicTripDetails(
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
 
+    const netAmountStr = formData.get("netAmount")?.toString();
+    const tripProfitStr = formData.get("tripProfit")?.toString();
+
     const updates: Record<string, any> = {
       tripType: formData.get("tripType"),
       departureCity: formData.get("departureCity"),
@@ -80,8 +83,8 @@ export async function updateLeadBasicTripDetails(
       duration: formData.get("duration"),
       guests: formData.get("guests"),
       budget: Number(formData.get("budget")) || lead.budget,
-      netAmount: Number(formData.get("netAmount")) || lead.netAmount || 0,
-      tripProfit: Number(formData.get("tripProfit")) || lead.tripProfit || 0,
+      netAmount: netAmountStr ? Number(netAmountStr) : lead.netAmount || 0,
+      tripProfit: tripProfitStr ? Number(tripProfitStr) : lead.tripProfit || 0,
       specialRequests:
         (formData.get("specialRequests") as string) || lead.specialRequests,
     };

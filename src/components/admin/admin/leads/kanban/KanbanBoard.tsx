@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { differenceInMinutes } from "date-fns";
 import {
   DndContext,
   DragOverlay,
@@ -25,6 +26,37 @@ interface KanbanBoardProps {
 export function KanbanBoard({ initialLeads }: KanbanBoardProps) {
   const [leads, setLeads] = useState<KanbanLead[]>(initialLeads);
   const [activeLead, setActiveLead] = useState<KanbanLead | null>(null);
+
+  // Auto-abandon leads that expire while viewing the board
+  useEffect(() => {
+    const expiredLeads = leads.filter((lead) => {
+      const isTerminal = ["won", "dropped", "abandoned"].includes(lead.stage);
+      if (isTerminal) return false;
+      
+      const updatedAt = new Date(lead.stageUpdatedAt || lead.updatedAt);
+      const minutesInactive = differenceInMinutes(new Date(), updatedAt);
+      const minutesLeft = Math.max(0, 10080 - minutesInactive);
+      
+      return minutesLeft <= 0;
+    });
+
+    if (expiredLeads.length > 0) {
+      setLeads((prev) => 
+        prev.map(l => expiredLeads.some(el => el._id === l._id) ? { ...l, stage: "abandoned" } : l)
+      );
+      
+      expiredLeads.forEach(async (lead) => {
+        try {
+          const res = await updateLeadStage(lead._id, "abandoned");
+          if (res.success) {
+            toast.info(`Auto-abandoned expired lead`);
+          }
+        } catch (error) {
+          console.error("Failed to auto abandon", error);
+        }
+      });
+    }
+  }, [leads]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -57,6 +89,11 @@ export function KanbanBoard({ initialLeads }: KanbanBoardProps) {
 
     const lead = leads.find((l) => l._id === leadId);
     if (!lead || lead.stage === newStage) return;
+
+    if (newStage === "abandoned") {
+      toast.error("Leads cannot be manually moved to Abandoned. This happens automatically after 7 days.");
+      return;
+    }
 
     // Optimistic Update
     setLeads((prev) =>

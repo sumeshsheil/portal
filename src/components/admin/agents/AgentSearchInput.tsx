@@ -41,7 +41,7 @@ export function AgentSearchInput({ defaultValue = "" }: AgentSearchInputProps) {
     <div className="relative flex-1 max-w-sm">
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
-        placeholder="Search agents..."
+        placeholder="Search travel partners..."
         className="pl-8"
         defaultValue={defaultValue}
         onChange={(e) => handleSearch(e.target.value)}

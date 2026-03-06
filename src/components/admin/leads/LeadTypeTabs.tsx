@@ -32,13 +32,13 @@ export function LeadTypeTabs() {
   return (
     <Select value={currentType} onValueChange={handleTypeChange}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Lead Type" />
+        <SelectValue placeholder="Inquiry Type" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
-            <span>All Leads</span>
+            <span>All Inquiries</span>
           </div>
         </SelectItem>
         <SelectItem value="domestic">

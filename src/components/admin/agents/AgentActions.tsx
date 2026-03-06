@@ -98,7 +98,7 @@ export function AgentActions({ agent }: AgentActionsProps) {
           <DropdownMenuItem
             onClick={() => navigator.clipboard.writeText(agentId)}
           >
-            Copy Agent ID
+            Copy Partner ID
           </DropdownMenuItem>
           <DropdownMenuSeparator />
 

@@ -158,7 +158,6 @@ export default function RootLayout({
               <SmoothScrollProvider>
                 <SystemHealthCheck />
                 {children}
-                <FloatingButtons />
                 <Toaster richColors position="top-right" />
               </SmoothScrollProvider>
             </SessionProvider>

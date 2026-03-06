@@ -12,6 +12,7 @@ interface PlanTripButtonProps {
     email: string;
     phone?: string;
     gender?: string;
+    birthDate?: Date;
     isPhoneVerified: boolean;
     isProfileComplete: boolean;
   };

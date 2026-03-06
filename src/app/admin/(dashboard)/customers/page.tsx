@@ -26,8 +26,8 @@ import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput"; /
 import { ExportCustomersButton } from "@/components/admin/customers/ExportCustomersButton";
 
 export const metadata: Metadata = {
-  title: "Customers | Budget Travel Packages",
-  description: "View and manage registered customers",
+  title: "Leads | Budget Travel Packages",
+  description: "View and manage registered leads",
 };
 
 interface CustomersPageProps {
@@ -87,9 +87,9 @@ export default async function CustomersPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Customers</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Leads</h2>
           <p className="text-muted-foreground">
-            A list of all users registered as customers.
+            A list of all users registered as leads.
           </p>
         </div>
         <ExportCustomersButton customers={exportData} />
@@ -97,10 +97,10 @@ export default async function CustomersPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Customer List</CardTitle>
+          <CardTitle>Lead List</CardTitle>
           <CardDescription>
             Showing {customers.length}{" "}
-            {customers.length === 1 ? "customer" : "customers"}
+            {customers.length === 1 ? "lead" : "leads"}
             {search && ` matching "${search}"`}
           </CardDescription>
         </CardHeader>
@@ -118,6 +118,8 @@ export default async function CustomersPage({
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Gender</TableHead>
+                  <TableHead>Date of Birth</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden md:table-cell">
@@ -133,14 +135,17 @@ export default async function CustomersPage({
                       className="h-24 text-center text-muted-foreground"
                     >
                       {search
-                        ? `No customers found matching "${search}".`
-                        : "No customers found."}
+                        ? `No leads found matching "${search}".`
+                        : "No leads found."}
                     </TableCell>
                   </TableRow>
                 ) : (
                   customers.map((customer) => (
                     <TableRow key={customer._id.toString()}>
-                      <TableCell className="font-medium">
+                      <TableCell
+                        className="font-medium max-w-[150px] truncate"
+                        title={customer.name}
+                      >
                         {customer.name}
                         {customer.isVerified && (
                           <Badge
@@ -151,7 +156,20 @@ export default async function CustomersPage({
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{customer.email}</TableCell>
+                      <TableCell
+                        className="max-w-[200px] truncate"
+                        title={customer.email}
+                      >
+                        {customer.email}
+                      </TableCell>
+                      <TableCell className="capitalize">
+                        {customer.gender || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {customer.birthDate
+                          ? format(new Date(customer.birthDate), "MMM d, yyyy")
+                          : "-"}
+                      </TableCell>
                       <TableCell>{customer.phone || "-"}</TableCell>
                       <TableCell>
                         <Badge

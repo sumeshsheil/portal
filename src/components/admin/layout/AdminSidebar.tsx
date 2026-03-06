@@ -13,6 +13,9 @@ import {
   FileText,
   Settings,
   Plane,
+  CreditCard,
+  LogOut,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import {
@@ -30,11 +33,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { signOut } from "next-auth/react";
 
 export function AdminAppSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
+  const isAgent = session?.user?.role === "agent";
   const isDarkMode = useTheme().resolvedTheme === "dark";
   const { isMobile, state, setOpenMobile } = useSidebar();
 
@@ -56,27 +68,70 @@ export function AdminAppSidebar() {
         items: [],
       },
       {
-        title: "Leads Management",
+        title: "Inquiries",
         url: "#", // Group header
         icon: FileText,
         isActive: pathname.startsWith("/admin/leads"),
         items: [
           {
-            title: "All Leads",
+            title: "All Inquiries",
             url: "/admin/leads",
             exact: true,
           },
           // Future: { title: "Kanban View", url: "/admin/leads/kanban" }
         ],
       },
+      ...(isAdmin
+        ? [
+            {
+              title: "Platform Users",
+              url: "/admin/customers",
+              icon: UserCircle,
+              isActive: pathname.startsWith("/admin/customers"),
+              items: [],
+            },
+            {
+              title: "Address Book",
+              url: "/admin/contacts",
+              icon: Users,
+              isActive: pathname.startsWith("/admin/contacts"),
+              items: [],
+            },
+          ]
+        : []),
+      ...(isAgent
+        ? [
+            {
+              title: "My Contacts",
+              url: "/admin/contacts",
+              icon: UserCircle,
+              isActive: pathname.startsWith("/admin/contacts"),
+              items: [],
+            },
+            {
+              title: "Finance & Earnings",
+              url: "/admin/finance",
+              icon: CreditCard,
+              isActive: pathname.startsWith("/admin/finance"),
+              items: [],
+            },
+            {
+              title: "Subscription",
+              url: "/admin/subscription",
+              icon: CreditCard,
+              isActive: pathname === "/admin/subscription",
+              items: [],
+            },
+          ]
+        : []),
     ],
     navAdmin: isAdmin
       ? [
           {
-            title: "Customers",
-            url: "/admin/customers",
-            icon: UserCircle,
-            isActive: pathname.startsWith("/admin/customers"),
+            title: "Finance & Earnings",
+            url: "/admin/finance",
+            icon: Plane, // Reusing Plane for now as a generic icon, can be changed
+            isActive: pathname.startsWith("/admin/finance"),
             items: [],
           },
           {
@@ -84,6 +139,13 @@ export function AdminAppSidebar() {
             url: "/admin/agents",
             icon: Users,
             isActive: pathname.startsWith("/admin/agents"),
+            items: [],
+          },
+          {
+            title: "Subscriptions",
+            url: "/admin/subscriptions",
+            icon: CreditCard,
+            isActive: pathname.startsWith("/admin/subscriptions"),
             items: [],
           },
           {
@@ -211,23 +273,51 @@ export function AdminAppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={data.user.avatar} alt={data.user.name} />
-                <AvatarFallback className="rounded-lg bg-emerald-600 text-white font-medium">
-                  {data.user.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{data.user.name}</span>
-                <span className="truncate text-xs capitalize">
-                  {data.user.role}
-                </span>
-              </div>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                    <AvatarFallback className="rounded-lg bg-emerald-600 text-white font-medium">
+                      {data.user.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {data.user.name}
+                    </span>
+                    <span className="truncate text-xs capitalize">
+                      {data.user.role === "agent" ? "Travel Partner" : data.user.role}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/profile" className="flex items-center gap-2">
+                    <UserCircle className="size-4" />
+                    <span>View Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-950/30"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  <LogOut className="mr-2 size-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

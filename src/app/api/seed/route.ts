@@ -37,7 +37,7 @@ const LEAD_STAGES = [
   "negotiation",
   "won",
   "lost",
-  "stale",
+  "abandoned",
 ] as const;
 
 const DESTINATIONS = [

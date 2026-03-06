@@ -230,7 +230,7 @@ export async function sendAgentWelcomeEmail({
             <p style="${styles.p}">For security reasons, we recommend changing your password immediately after your first login.</p>
             
             <div style="text-align: center;">
-              <a href="${process.env.NEXTAUTH_URL}/admin/login" style="${styles.button}">Login to Dashboard</a>
+              <a href="${process.env.NEXTAUTH_URL}/" style="${styles.button}">Login to Dashboard</a>
             </div>
           </div>
           <div style="${styles.footer}">
@@ -285,7 +285,7 @@ export async function sendAgentPromotionEmail({
             <p style="${styles.p}">You will now see more options when you log in to the portal.</p>
             
             <div style="text-align: center;">
-              <a href="${process.env.NEXTAUTH_URL}/admin/login" style="${styles.button}">Access Admin Portal</a>
+              <a href="${process.env.NEXTAUTH_URL}/" style="${styles.button}">Access Admin Portal</a>
             </div>
           </div>
           <div style="${styles.footer}">
@@ -526,9 +526,15 @@ export async function sendAgentOnboardingEmail({
 export async function sendAgentVerificationNotification({
   agentName,
   agentEmail,
+  agentPhone,
+  agentGender,
+  agentAge,
 }: {
   agentName: string;
   agentEmail: string;
+  agentPhone?: string;
+  agentGender?: string;
+  agentAge?: number;
 }) {
   try {
     const { data, error } = await resend.emails.send({
@@ -547,12 +553,15 @@ export async function sendAgentVerificationNotification({
             <div style="${styles.dataBox}">
               <p style="${styles.dataItem}"><span style="${styles.accentText}">Name:</span> ${agentName}</p>
               <p style="${styles.dataItem}"><span style="${styles.accentText}">Email:</span> ${agentEmail}</p>
+              ${agentPhone ? `<p style="${styles.dataItem}"><span style="${styles.accentText}">Phone:</span> ${agentPhone}</p>` : ""}
+              ${agentGender ? `<p style="${styles.dataItem}"><span style="${styles.accentText}">Gender:</span> ${agentGender}</p>` : ""}
+              ${agentAge ? `<p style="${styles.dataItem}"><span style="${styles.accentText}">Age:</span> ${agentAge}</p>` : ""}
             </div>
 
             <p style="${styles.p}">Log in to the admin portal to review their documents and verify.</p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL}/admin" style="${styles.button}">Go to Admin Portal</a>
+              <a href="${process.env.NEXTAUTH_URL}/admin/agents" style="${styles.button}">Verify in Admin Portal</a>
             </div>
           </div>
           <div style="${styles.footer}">
@@ -569,6 +578,266 @@ export async function sendAgentVerificationNotification({
     return { success: true, data };
   } catch (error) {
     console.error("Email Exception (Agent Verification):", error);
+    return { success: false, error };
+  }
+}
+
+// 8. Send Agent Rejection Notification (From HELLO_EMAIL)
+export async function sendAgentRejectionEmail({
+  agentName,
+  agentEmail,
+  rejectionNote,
+  resubmitUrl,
+}: {
+  agentName: string;
+  agentEmail: string;
+  rejectionNote: string;
+  resubmitUrl: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: HELLO_EMAIL,
+      to: [agentEmail],
+      subject: "Action Required: Agent Verification Update",
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">Verification Update</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${agentName},</h2>
+            <p style="${styles.p}">We have reviewed your agent verification request. Unfortunately, we cannot approve it at this time.</p>
+            
+            <div style="${styles.dataBox}">
+              <p style="${styles.p}; margin-bottom: 8px;"><strong>Reason / Notes from Admin:</strong></p>
+              <p style="${styles.p}; margin: 4px 0; color: #dc2626; font-weight: 500;">
+                ${rejectionNote || "Please review your submitted documents and ensure all information is accurate and clear."}
+              </p>
+            </div>
+
+            <p style="${styles.p}">Please click the button below to update your details and resubmit your verification request.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resubmitUrl}" style="${styles.button}">Resubmit Verification</a>
+            </div>
+            
+            <p style="${styles.p}">This link will expire in 72 hours.</p>
+            <p style="${styles.p}">Warm regards,<br/>The Budget Travel Team</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>If you have questions, reply to this email.</p>
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Agent Rejection):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Agent Rejection):", error);
+    return { success: false, error };
+  }
+}
+
+// 9. Send Agent Approval Notification (From HELLO_EMAIL)
+export async function sendAgentApprovalEmail({
+  agentName,
+  agentEmail,
+}: {
+  agentName: string;
+  agentEmail: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: HELLO_EMAIL,
+      to: [agentEmail],
+      subject: "Welcome! Your Agent Account is Approved 🎉",
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">Account Verified</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${agentName},</h2>
+            <p style="${styles.p}">Great news! We have successfully reviewed your documents and approved your agent verification request.</p>
+            
+            <p style="${styles.p}">Your account is now fully active. You can log into your admin dashboard to start managing your trips, leads, and clients.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXTAUTH_URL}/" style="${styles.button}">Access Dashboard</a>
+            </div>
+            
+            <p style="${styles.p}">Warm regards,<br/>The Budget Travel Team</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>If you have questions, reply to this email.</p>
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Agent Approval):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Agent Approval):", error);
+    return { success: false, error };
+  }
+}
+
+// 10. Send Lead Assignment Email (From BOOKINGS_EMAIL)
+export async function sendLeadAssignmentEmail({
+  agentName,
+  agentEmail,
+  leadCount = 1,
+  leadUrl,
+}: {
+  agentName: string;
+  agentEmail: string;
+  leadCount?: number;
+  leadUrl: string;
+}) {
+  try {
+    const isBulk = leadCount > 1;
+    const title = isBulk ? "New Leads Assigned" : "New Lead Assigned";
+    const subject = isBulk
+      ? `You've been assigned ${leadCount} new leads! 🚀`
+      : "You've been assigned a new lead! 🚀";
+
+    const contentBox = isBulk
+      ? `<p style="${styles.p}">You have been assigned <strong>${leadCount} new leads</strong>. Log in to your dashboard to review them and start reaching out.</p>`
+      : `<p style="${styles.p}">A new lead has been assigned to you. Log in to your dashboard to view the lead's details and start the conversation.</p>`;
+
+    const { data, error } = await resend.emails.send({
+      from: BOOKINGS_EMAIL,
+      to: [agentEmail],
+      subject,
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">${title}</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${agentName},</h2>
+            ${contentBox}
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${leadUrl}" style="${styles.button}">View Leads in Dashboard</a>
+            </div>
+            
+            <p style="${styles.p}">Following up quickly increases the chance of securing a booking!</p>
+            <p style="${styles.p}">Happy Selling,<br/>The Budget Travel Team</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>Budget Travel Agent Notification System</p>
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Lead Assignment):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Lead Assignment):", error);
+    return { success: false, error };
+  }
+}
+// 11. Send Payment Status Notification (Confirmed or Rejected)
+export async function sendPaymentStatusNotification({
+  to,
+  name,
+  amount,
+  status,
+  transactionId,
+  type,
+  destination,
+  rejectionReason,
+}: {
+  to: string;
+  name: string;
+  amount: number;
+  status: "verified" | "rejected";
+  transactionId: string;
+  type: "booking" | "trip_cost";
+  destination: string;
+  rejectionReason?: string;
+}) {
+  try {
+    const isVerified = status === "verified";
+    const paymentLabel = type === "booking" ? "Booking Amount" : "Trip Cost";
+    
+    const subject = isVerified 
+      ? `Payment Confirmed: Trip to ${destination} ✅`
+      : `Action Required: Payment Rejected for ${destination} ❌`;
+
+    const html = `
+      <div style="${styles.container}">
+        <div style="${styles.header}">
+          <h1 style="${styles.headerTitle}">${isVerified ? "Payment Confirmed" : "Payment Rejected"}</h1>
+        </div>
+        <div style="${styles.body}">
+          <h2 style="${styles.h2}">Hello ${name},</h2>
+          <p style="${styles.p}">
+            ${isVerified 
+              ? `Great news! We have successfully verified your payment of <strong>₹${amount.toLocaleString("en-IN")}</strong> for your trip to <strong>${destination}</strong>.`
+              : `We were unable to verify your payment of <strong>₹${amount.toLocaleString("en-IN")}</strong> for your trip to <strong>${destination}</strong>.`
+            }
+          </p>
+          
+          <div style="${styles.dataBox}">
+            <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Type:</strong> ${paymentLabel}</p>
+            <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Amount:</strong> ₹${amount.toLocaleString("en-IN")}</p>
+            <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Transaction ID:</strong> ${transactionId}</p>
+            <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Status:</strong> <span style="color: ${isVerified ? "#10b981" : "#ef4444"}; font-weight: 700; text-transform: uppercase;">${status}</span></p>
+          </div>
+
+          ${!isVerified && rejectionReason ? `
+            <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 16px; margin: 20px 0;">
+              <p style="color: #be123c; font-weight: 700; margin-bottom: 8px;">Reason for Rejection:</p>
+              <p style="color: #be123c; margin: 0;">${rejectionReason}</p>
+            </div>
+            <p style="${styles.p}">Please log in to your dashboard to resubmit the payment with the correct transaction details.</p>
+          ` : ""}
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/dashboard/bookings" style="${styles.button}">View Dashboard</a>
+          </div>
+
+          <p style="${styles.p}">If you have any questions, please reply to this email or contact your assigned agent.</p>
+          <p style="${styles.p}">Best regards,<br/>The Budget Travel Team</p>
+        </div>
+        <div style="${styles.footer}">
+           <p>This email was sent from <strong>booking@budgettravelpackages.in</strong></p>
+           <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+
+    const { data, error } = await resend.emails.send({
+      from: BOOKINGS_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("Resend Error (Payment Status):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Payment Status):", error);
     return { success: false, error };
   }
 }

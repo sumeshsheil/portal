@@ -51,11 +51,7 @@ export async function POST(req: Request) {
         );
         await existingUser.save();
 
-        const hostname = req.headers.get("host") || "";
-        const isLocalhost = hostname.includes("localhost");
-        const portalBaseUrl = isLocalhost
-          ? "http://portals.localhost:3000"
-          : "https://portals.budgettravelpackages.in";
+        const portalBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
         const onboardingUrl = `${portalBaseUrl}/admin/onboarding?token=${rawToken}`;
         await sendAgentOnboardingEmail({
@@ -107,11 +103,7 @@ export async function POST(req: Request) {
       setPasswordExpires: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
     });
 
-    const hostname = req.headers.get("host") || "";
-    const isLocalhost = hostname.includes("localhost");
-    const portalBaseUrl = isLocalhost
-      ? "http://portals.localhost:3000"
-      : "https://portals.budgettravelpackages.in";
+    const portalBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     const onboardingUrl = `${portalBaseUrl}/admin/onboarding?token=${rawToken}`;
 

@@ -28,8 +28,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VerificationRequestList } from "@/components/admin/agents/VerificationRequestList";
 
 export const metadata: Metadata = {
-  title: "Agent Management | Budget Travel Packages",
-  description: "Manage travel agents and their permissions",
+  title: "Travel Partner Management | Budget Travel Packages",
+  description: "Manage travel partners and their permissions",
 };
 
 interface AgentsPageProps {
@@ -76,20 +76,27 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
     .sort({ updatedAt: -1 })
     .lean()) as unknown as any[];
 
+  const subscribedAgents = (await User.find({
+    role: "agent",
+    plan: "pro",
+    subscriptionStatus: "active",
+  })
+    .sort({ updatedAt: -1 })
+    .lean()) as unknown as any[];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Agents</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Travel Partners</h2>
           <p className="text-muted-foreground">
-            Manage your team of travel agents and verify their profiles.
+            Manage your team of travel partners and verify their profiles.
           </p>
         </div>
       </div>
 
-      <Tabs defaultValue="team" className="space-y-4">
+      <Tabs defaultValue="verifications" className="space-y-4">
         <TabsList className="bg-slate-100 dark:bg-slate-800">
-          <TabsTrigger value="team">Team Members</TabsTrigger>
           <TabsTrigger value="verifications" className="relative">
             Verification Requests
             {pendingRequests.length > 0 && (
@@ -98,6 +105,8 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="team">Team Members</TabsTrigger>
+          <TabsTrigger value="subscriptions">Subscribed Members</TabsTrigger>
         </TabsList>
 
         <TabsContent value="team" className="space-y-4">
@@ -105,7 +114,7 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
             <CardHeader>
               <CardTitle>Team Members</CardTitle>
               <CardDescription>
-                A list of all registered travel agents who can manage leads.
+                A list of all registered travel partners who can manage leads.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -205,6 +214,60 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
               <VerificationRequestList
                 requests={JSON.parse(JSON.stringify(pendingRequests))}
               />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="subscriptions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscribed Members</CardTitle>
+              <CardDescription>
+                Overview of agents with active Pro subscriptions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border text-sm">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agent</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Cycle</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Expires</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subscribedAgents.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                          No subscribed members found.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      subscribedAgents.map((agent) => (
+                        <TableRow key={agent._id.toString()}>
+                          <TableCell className="font-bold">{agent.name}</TableCell>
+                          <TableCell>
+                            <Badge className="bg-emerald-500 text-white border-none uppercase text-[10px]">
+                              {agent.plan}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="capitalize">{agent.billingCycle || "N/A"}</TableCell>
+                          <TableCell>
+                             <Badge variant="outline" className="border-emerald-200 text-emerald-600 bg-emerald-50">
+                               {agent.subscriptionStatus}
+                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {agent.subscriptionEndDate ? format(new Date(agent.subscriptionEndDate), "MMM d, yyyy") : "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

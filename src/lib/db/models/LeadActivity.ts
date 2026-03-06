@@ -37,8 +37,8 @@ const LeadActivitySchema = new Schema<ILeadActivity>(
         "agent_unassigned",
         "note_added",
         "details_updated",
-        "auto_stale",
-        "stale_recovered",
+        "auto_abandon",
+        "abandon_recovered",
       ],
     },
     details: {

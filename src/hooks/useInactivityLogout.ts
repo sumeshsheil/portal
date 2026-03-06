@@ -27,7 +27,7 @@ export function useInactivityLogout() {
         duration: 5000,
         id: "session-expired",
       });
-      signOut({ callbackUrl: window.location.origin + "/admin/login" });
+      signOut({ callbackUrl: window.location.origin + "/" });
     }, INACTIVITY_TIMEOUT);
   }, []);
 

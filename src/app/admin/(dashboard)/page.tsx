@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CreateLeadDialog } from "@/components/admin/leads/CreateLeadDialog";
+import { CreateCustomerDialog } from "@/components/admin/customers/CreateCustomerDialog";
+import { UserPlus } from "lucide-react";
 
 import { getDashboardStats } from "./actions";
 
@@ -45,72 +47,118 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div
-        className={`grid gap-4 md:grid-cols-2 ${stats.isAgent ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
-      >
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {stats.isAgent ? "My Leads" : "Total Leads"}
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalLeads}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.isAgent ? "Assigned to you" : "Across all stages"}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.isAgent ? (
+          <>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">My Leads</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.createdContacts}</div>
+                <p className="text-xs text-muted-foreground">
+                  Personal contacts created
+                </p>
+              </CardContent>
+            </Card>
 
-        {!stats.isAgent && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Agents
-              </CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeAgents}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently handling leads
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Assigned Inquiries</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalLeads}</div>
+                <p className="text-xs text-muted-foreground">
+                  Inquiries assigned to you
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Converted</CardTitle>
+                <Banknote className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.wonLeadsCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  Inquiries successfully won
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.conversionRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Based on assigned inquiries
+                </p>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Inquiries</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalLeads}</div>
+                <p className="text-xs text-muted-foreground">
+                  Across all stages
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.activeAgents}</div>
+                <p className="text-xs text-muted-foreground">
+                  Currently handling inquiries
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.conversionRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Inquiries converted to won
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                <Banknote className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  ₹{stats.totalRevenue.toLocaleString("en-IN")}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Total trip cost of won inquiries
+                </p>
+              </CardContent>
+            </Card>
+          </>
         )}
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Conversion Rate
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.conversionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.isAgent
-                ? "Your leads converted"
-                : "Leads converted to won"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue (Won)</CardTitle>
-            <Banknote className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ₹{stats.totalRevenue.toLocaleString("en-IN")}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Total budget of won trips
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -150,7 +198,17 @@ export default async function DashboardPage() {
                         variant="secondary"
                         className="capitalize text-[10px] h-5"
                       >
-                        {lead.stage.replace("_", " ")}
+                        {lead.stage === "new"
+                          ? "Inquiry Received"
+                          : lead.stage === "contacted"
+                            ? "Under Review"
+                            : lead.stage === "proposal_sent"
+                              ? "Proposal Ready"
+                              : lead.stage === "negotiation"
+                                ? "Finalizing"
+                                : lead.stage === "won"
+                                  ? "Trip Confirmed"
+                                  : lead.stage.replace("_", " ")}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(lead.date), "MMM d")}
@@ -176,20 +234,13 @@ export default async function DashboardPage() {
               </Link>
             </Button>
             {!stats.isAgent && (
-              <Button
-                asChild
-                className="w-full justify-start"
-                variant="outline"
-              >
-                <Link href="/admin/agents">
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Agents
-                </Link>
-              </Button>
+              <CreateCustomerDialog fullWidth />
             )}
-            <div className="w-full">
-              <CreateLeadDialog fullWidth />
-            </div>
+            {!stats.isAgent && (
+              <div className="w-full">
+                <CreateLeadDialog fullWidth />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

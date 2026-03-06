@@ -2,8 +2,8 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import Image from "next/image";
-import { format } from "date-fns";
-import { MapPin, Calendar, User as UserIcon, Banknote } from "lucide-react";
+import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
+import { MapPin, Calendar, User as UserIcon, Banknote, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { KanbanLead } from "./types";
@@ -26,6 +26,22 @@ export function KanbanCard({ lead }: KanbanCardProps) {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
     : undefined;
+
+  const isTerminal = ["won", "dropped", "abandoned"].includes(lead.stage);
+  const updatedAt = new Date(lead.stageUpdatedAt || lead.updatedAt);
+  const minutesInactive = differenceInMinutes(new Date(), updatedAt);
+  const minutesLeft = Math.max(0, 10080 - minutesInactive); // 7 days * 24 * 60
+  
+  const isInactive = !isTerminal && minutesLeft <= 0;
+  const isExpiringSoon = minutesLeft <= 2880; // 2 days in minutes
+
+  const timeLeftLabel = minutesLeft >= 1440 
+    ? `${Math.floor(minutesLeft / 1440)}d left`
+    : minutesLeft >= 60 
+      ? `${Math.floor(minutesLeft / 60)}h left`
+      : `${minutesLeft}min left`;
+
+  const hasPendingPayment = lead.bookingPayments?.some(p => p.status === "pending");
 
   return (
     <div
@@ -88,9 +104,31 @@ export function KanbanCard({ lead }: KanbanCardProps) {
       </div>
 
       <div className="flex items-center justify-between pt-2 border-t">
-        <span className="text-[10px] text-muted-foreground">
-          {format(new Date(lead.createdAt), "MMM d")}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground">
+            {format(new Date(lead.createdAt), "MMM d")}
+          </span>
+          {!isTerminal && (
+            <span
+              className={cn(
+                "px-2 py-1 rounded text-[11px] font-bold leading-none shadow-sm",
+                isExpiringSoon
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                  : "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+              )}
+            >
+              {timeLeftLabel}
+            </span>
+          )}
+          {hasPendingPayment && !isTerminal && (
+            <span
+              className="px-1.5 py-0.5 rounded text-[10px] font-bold leading-none bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex items-center gap-1 shadow-sm"
+              title="Payment Pending"
+            >
+              <CreditCard className="h-3 w-3" /> Payment Check
+            </span>
+          )}
+        </div>
 
         {lead.agentId ? (
           <Avatar className="h-5 w-5">

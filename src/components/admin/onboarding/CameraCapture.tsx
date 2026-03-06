@@ -27,46 +27,63 @@ export function CameraCapture({
   const startCamera = useCallback(async () => {
     setError(null);
 
-    // Check for Secure Context (Browser hardware protection)
+    // Check for Secure Context
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setError(
-        "Camera access requires a Secure Context. Please use 'localhost' or an HTTPS connection.",
-      );
+      setError("Camera access requires a Secure Context (HTTPS or localhost).");
       return;
     }
 
+    // Stop any existing stream first
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 640, height: 480 },
+      // For Aadhaar/PAN we likely want back camera on mobile
+      const isDocument =
+        label.toLowerCase().includes("aadhaar") ||
+        label.toLowerCase().includes("pan");
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: isDocument ? { ideal: "environment" } : "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: false,
-      });
+      };
+
+      const mediaStream =
+        await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
       setIsCameraActive(true);
       setPreview(null);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch {
+    } catch (err) {
+      console.error("Camera error:", err);
       setError(
-        "Camera access denied. Please allow camera access in your browser settings and try again.",
+        "Camera access denied or not available. Please check permissions.",
       );
     }
-  }, []);
+  }, [stream, label]);
 
   const stopCamera = useCallback(() => {
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
       setStream(null);
-      setIsCameraActive(false);
     }
+    setIsCameraActive(false);
   }, [stream]);
 
   const capture = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+
+    // Use actual video dimensions
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.drawImage(video, 0, 0);
@@ -81,6 +98,14 @@ export function CameraCapture({
     setPreview(null);
     startCamera();
   }, [startCamera]);
+
+  // Sync stream to video element
+  useEffect(() => {
+    if (isCameraActive && stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(console.error);
+    }
+  }, [isCameraActive, stream]);
 
   // Cleanup on unmount
   useEffect(() => {

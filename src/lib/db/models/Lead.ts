@@ -5,11 +5,12 @@ import mongoose, { Schema, type Document, type Model } from "mongoose";
 export const LEAD_STAGES = [
   "new",
   "contacted",
-  "qualified",
+  "booked",
   "proposal_sent",
   "negotiation",
   "won",
-  "lost",
+  "dropped",
+  "abandoned",
 ] as const;
 
 export type LeadStage = (typeof LEAD_STAGES)[number];
@@ -71,6 +72,14 @@ export interface IItineraryDay {
   transport?: string;
 }
 
+export interface IBookingPayment {
+  amount: number;
+  type: "booking" | "trip_cost";
+  transactionId: string;
+  status: "pending" | "verified" | "rejected";
+  submittedAt: Date;
+}
+
 export interface ILead extends Document {
   _id: mongoose.Types.ObjectId;
 
@@ -97,10 +106,12 @@ export interface ILead extends Document {
 
   // Customer link
   customerId?: mongoose.Types.ObjectId;
+  contactId?: mongoose.Types.ObjectId;
 
   // Payment tracking
   paymentStatus: "pending" | "partial" | "paid";
   paymentAmount?: number;
+  bookingPayments?: IBookingPayment[];
 
   // Trip details — Admin managed
   documents?: IDocument[];
@@ -302,6 +313,10 @@ const LeadSchema = new Schema<ILead>(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    contactId: {
+      type: Schema.Types.ObjectId,
+      ref: "Contact",
+    },
 
     // === PAYMENT TRACKING ===
     paymentStatus: {
@@ -312,6 +327,13 @@ const LeadSchema = new Schema<ILead>(
     paymentAmount: {
       type: Number,
     },
+    bookingPayments: [{
+      amount: { type: Number, required: true },
+      type: { type: String, enum: ["booking", "trip_cost"], required: true },
+      transactionId: { type: String, required: true, trim: true },
+      status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
+      submittedAt: { type: Date, default: Date.now },
+    }],
 
     // === TRIP DETAILS (Admin-managed) ===
     documents: {
@@ -399,7 +421,7 @@ LeadSchema.index({ agentId: 1 });
 LeadSchema.index({ source: 1 });
 LeadSchema.index({ createdAt: -1 });
 LeadSchema.index({ lastActivityAt: 1 });
-LeadSchema.index({ stage: 1, lastActivityAt: 1 }); // For stale lead detection
+LeadSchema.index({ stage: 1, lastActivityAt: 1 }); // For abandoned lead detection
 LeadSchema.index({ customerId: 1 }); // For customer dashboard queries
 
 // ============ MODEL ============

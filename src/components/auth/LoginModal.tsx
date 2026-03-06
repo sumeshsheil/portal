@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import Image from "next/image";
 import { toast } from "sonner";
-import { OtpInput } from "@/components/landing/sections/booking/components/OtpInput";
+import { OtpInput } from "@/components/ui/otp-input";
 
 // Schemas
 const loginSchema = z.object({
@@ -171,6 +171,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
     return () => clearInterval(timer);
   }, [countdown]);
+
+  // Auto-verify OTP when 6 digits are entered
+  const otpValue = otpVerificationForm.watch("otp");
+  useEffect(() => {
+    if (otpValue?.length === 6 && !isLoading && view === "OTP_VERIFICATION") {
+      otpVerificationForm.handleSubmit(onVerifyOtp)();
+    }
+  }, [otpValue, isLoading, view, otpVerificationForm]);
 
   // Handlers
   async function onLogin(values: LoginFormValues) {

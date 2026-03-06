@@ -42,7 +42,7 @@ export default function ChangePasswordPage() {
       toast.success(state.message || "Password changed successfully");
       // Sign out so they log in with the new password
       setTimeout(() => {
-        signOut({ callbackUrl: "/admin/login" });
+        signOut({ callbackUrl: "/" });
       }, 1500);
     }
   }, [state]);

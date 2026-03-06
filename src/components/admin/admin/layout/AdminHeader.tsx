@@ -270,7 +270,7 @@ export function AdminHeader() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+              onClick={() => signOut({ callbackUrl: "/" })}
               className="text-red-600 focus:text-red-600 focus:bg-red-50"
             >
               <LogOut className="mr-2 h-4 w-4" />

@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { updateAgentVerificationStatus } from "@/app/admin/(dashboard)/agents/actions";
 
 interface VerificationRequest {
@@ -43,6 +44,7 @@ interface VerificationRequest {
   name: string;
   email: string;
   phone?: string;
+  image?: string;
   aadhaarNumber?: string;
   panNumber?: string;
   documents?: {
@@ -97,7 +99,7 @@ export function VerificationRequestList({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Agent</TableHead>
+              <TableHead>Travel Partner</TableHead>
               <TableHead>Aadhaar / PAN</TableHead>
               <TableHead>Submitted</TableHead>
               <TableHead>Status</TableHead>
@@ -118,11 +120,19 @@ export function VerificationRequestList({
               requests.map((request) => (
                 <TableRow key={request._id}>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{request.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {request.email}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={request.image} alt={request.name} />
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                          {request.name?.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{request.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {request.email}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -162,75 +172,88 @@ export function VerificationRequestList({
                           <Eye className="h-4 w-4 mr-2" /> Review
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="lg:max-w-4xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Review Agent Verification</DialogTitle>
+                          <DialogTitle>Review Travel Partner Verification</DialogTitle>
                           <DialogDescription>
                             Review the identity documents provided by{" "}
                             {request.name}.
                           </DialogDescription>
                         </DialogHeader>
 
-                        <div className="grid grid-cols-2 gap-6 py-4">
-                          <div className="space-y-4">
-                            <h4 className="font-bold flex items-center gap-2">
-                              <User className="h-4 w-4" /> Agent Details
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <p>
-                                <span className="text-muted-foreground">
-                                  Name:
-                                </span>{" "}
-                                {request.name}
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">
-                                  Email:
-                                </span>{" "}
-                                {request.email}
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">
-                                  Phone:
-                                </span>{" "}
-                                {request.phone || "N/A"}
-                              </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 px-2">
+                          <div className="space-y-8">
+                            <div>
+                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                                <User className="h-5 w-5" /> Travel Partner Details
+                              </h4>
+                              <div className="flex items-center gap-4 mb-4">
+                                <Avatar className="h-14 w-14 lg:w-26 lg:h-26">
+                                  <AvatarImage
+                                    src={request.image}
+                                    alt={request.name}
+                                  />
+                                  <AvatarFallback className="bg-emerald-100 text-emerald-700 text-lg">
+                                    {request.name
+                                      ?.substring(0, 2)
+                                      .toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-bold text-slate-900">
+                                    {request.name}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {request.email}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="space-y-3 text-[15px] text-slate-800">
+                                <p>
+                                  <span className="text-muted-foreground w-16 inline-block">
+                                    Phone:
+                                  </span>{" "}
+                                  {request.phone || "N/A"}
+                                </p>
+                              </div>
                             </div>
 
-                            <h4 className="font-bold flex items-center gap-2 pt-2">
-                              <ShieldAlert className="h-4 w-4" /> Identification
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <p>
-                                <span className="text-muted-foreground">
-                                  Aadhaar:
-                                </span>{" "}
-                                {request.aadhaarNumber || "N/A"}
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">
-                                  PAN:
-                                </span>{" "}
-                                {request.panNumber || "N/A"}
-                              </p>
+                            <div>
+                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                                <ShieldAlert className="h-5 w-5" />{" "}
+                                Identification
+                              </h4>
+                              <div className="space-y-3 text-[15px] text-slate-800">
+                                <p>
+                                  <span className="text-muted-foreground w-20 inline-block">
+                                    Aadhaar:
+                                  </span>{" "}
+                                  {request.aadhaarNumber || "N/A"}
+                                </p>
+                                <p>
+                                  <span className="text-muted-foreground w-20 inline-block">
+                                    PAN:
+                                  </span>{" "}
+                                  {request.panNumber || "N/A"}
+                                </p>
+                              </div>
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <h4 className="font-bold flex items-center gap-2">
-                              <FileText className="h-4 w-4" /> Documents
+                            <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                              <FileText className="h-5 w-5" /> Documents
                             </h4>
-                            <div className="space-y-3">
-                              <div className="p-3 border rounded-lg bg-emerald-50/30">
-                                <p className="text-xs font-bold mb-2">
-                                  Aadhaar Card (PDF)
+                            <div className="space-y-4">
+                              <div className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
+                                <p className="text-[15px] font-bold mb-3 text-slate-900">
+                                  Aadhaar Card
                                 </p>
                                 {request.documents?.aadharCard?.[0] ? (
                                   <Button
                                     variant="link"
-                                    size="sm"
                                     asChild
-                                    className="p-0 h-auto"
+                                    className="p-0 h-auto text-[#00E676] hover:text-[#00C853] font-semibold text-base"
                                   >
                                     <a
                                       href={request.documents.aadharCard[0]}
@@ -241,21 +264,20 @@ export function VerificationRequestList({
                                     </a>
                                   </Button>
                                 ) : (
-                                  <span className="text-xs text-red-500">
+                                  <span className="text-[15px] text-red-500">
                                     Not uploaded
                                   </span>
                                 )}
                               </div>
-                              <div className="p-3 border rounded-lg bg-emerald-50/30">
-                                <p className="text-xs font-bold mb-2">
-                                  PAN Card (PDF)
+                              <div className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
+                                <p className="text-[15px] font-bold mb-3 text-slate-900">
+                                  PAN Card
                                 </p>
                                 {request.documents?.panCard?.[0] ? (
                                   <Button
                                     variant="link"
-                                    size="sm"
                                     asChild
-                                    className="p-0 h-auto"
+                                    className="p-0 h-auto text-[#00E676] hover:text-[#00C853] font-semibold text-base"
                                   >
                                     <a
                                       href={request.documents.panCard[0]}
@@ -266,7 +288,7 @@ export function VerificationRequestList({
                                     </a>
                                   </Button>
                                 ) : (
-                                  <span className="text-xs text-red-500">
+                                  <span className="text-[15px] text-red-500">
                                     Not uploaded
                                   </span>
                                 )}
@@ -275,16 +297,19 @@ export function VerificationRequestList({
                           </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label>Admin Notes / Feedback (Optional)</Label>
+                        <div className="space-y-3 pb-4">
+                          <Label className="text-base font-semibold text-slate-900">
+                            Admin Notes / Feedback (Optional)
+                          </Label>
                           <Textarea
                             placeholder="Reason for rejection or internal notes..."
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
+                            className="resize-none h-24 text-[15px] rounded-xl"
                           />
                         </div>
 
-                        <DialogFooter className="gap-2 sm:gap-0">
+                        <DialogFooter className="gap-2 lg:gap-6">
                           <Button
                             variant="destructive"
                             onClick={() => handleStatusUpdate("rejected")}
@@ -307,7 +332,7 @@ export function VerificationRequestList({
                             ) : (
                               <Check className="h-4 w-4 mr-2" />
                             )}
-                            Approve Agent
+                            Approve Partner
                           </Button>
                         </DialogFooter>
                       </DialogContent>

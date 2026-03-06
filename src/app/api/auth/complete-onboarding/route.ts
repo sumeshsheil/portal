@@ -10,17 +10,39 @@ const onboardingSchema = z.object({
   token: z.string().min(1, "Token is required"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  gender: z.enum(["male", "female", "other"]),
-  age: z.number().min(18, "Must be at least 18").max(120),
-  phone: z.string().min(10, "Valid phone number required"),
-  address: z.string().min(5, "Address is required"),
-  aadhaarNumber: z.string().min(12, "Valid Aadhaar number required"),
-  panNumber: z.string().min(10, "Valid PAN number required"),
+  gender: z
+    .any()
+    .refine((val) => ["male", "female", "other"].includes(String(val)), {
+      message: "Please select a valid gender option",
+    }),
+  age: z
+    .any()
+    .refine(
+      (val) => {
+        const num = parseInt(String(val || ""), 10);
+        return !isNaN(num) && num >= 18 && num <= 120;
+      },
+      {
+        message: "Please enter a valid age (18-120)",
+      },
+    )
+    .transform((val) => parseInt(String(val), 10)),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(/^\d{10}$/, "Enter a valid 10-digit phone number"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  aadhaarNumber: z
+    .string()
+    .regex(/^\d{12}$/, "Invalid 12-digit Aadhaar number"),
+  panNumber: z
+    .string()
+    .regex(/^[a-zA-Z0-9]{10}$/, "Invalid 10-character PAN format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   // Image URLs (already uploaded to ImageKit)
-  aadhaarImage: z.string().url("Aadhaar image URL required"),
-  panImage: z.string().url("PAN image URL required"),
-  faceImage: z.string().url("Face image URL required"),
+  aadhaarImage: z.string().url("Aadhaar image is required"),
+  panImage: z.string().url("PAN image is required"),
+  faceImage: z.string().url("Face verification image is required"),
 });
 
 export async function POST(req: Request) {
@@ -68,7 +90,7 @@ export async function POST(req: Request) {
     user.firstName = data.firstName;
     user.lastName = data.lastName;
     user.name = `${data.firstName} ${data.lastName}`;
-    user.gender = data.gender;
+    user.gender = data.gender as any;
     user.age = data.age;
     user.phone = data.phone;
     user.address = data.address;
@@ -92,6 +114,9 @@ export async function POST(req: Request) {
     await sendAgentVerificationNotification({
       agentName: user.name,
       agentEmail: user.email,
+      agentPhone: user.phone,
+      agentGender: user.gender,
+      agentAge: user.age,
     });
 
     return NextResponse.json(

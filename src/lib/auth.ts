@@ -5,12 +5,13 @@ import bcryptjs from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
 
-// Extend NextAuth types
 declare module "next-auth" {
   interface User {
     role: "admin" | "agent" | "customer";
     mustChangePassword: boolean;
     isPhoneVerified: boolean;
+    aadhaarNumber?: string;
+    passportNumber?: string;
   }
   interface Session {
     user: {
@@ -20,6 +21,8 @@ declare module "next-auth" {
       role: "admin" | "agent" | "customer";
       mustChangePassword: boolean;
       isPhoneVerified: boolean;
+      aadhaarNumber?: string;
+      passportNumber?: string;
     };
   }
 }
@@ -30,6 +33,8 @@ declare module "next-auth" {
     userId: string;
     mustChangePassword: boolean;
     isPhoneVerified: boolean;
+    aadhaarNumber?: string;
+    passportNumber?: string;
   }
 }
 
@@ -91,6 +96,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           role: user.role,
           mustChangePassword: user.mustChangePassword,
           isPhoneVerified: user.isPhoneVerified,
+          aadhaarNumber: user.aadhaarNumber,
+          passportNumber: user.passportNumber,
         };
       },
     }),
@@ -100,10 +107,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 365 * 24 * 60 * 60, // 365 days
   },
   // NOTE: Do NOT set pages.signIn here.
-  // The proxy middleware handles admin login redirects on the portals domain,
+  // The proxy middleware handles admin login redirects for /admin routes,
   // and customer login is handled separately at /dashboard/login.
-  // Setting a global signIn page to /admin/login breaks the public domain
-  // because proxy.ts blocks /admin/* routes there (returns 404).
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -111,6 +116,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.userId = user.id!;
         token.mustChangePassword = user.mustChangePassword;
         token.isPhoneVerified = user.isPhoneVerified;
+        token.aadhaarNumber = user.aadhaarNumber;
+        token.passportNumber = user.passportNumber;
       }
 
       // Re-read isPhoneVerified from DB on every token refresh so
@@ -137,6 +144,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as "admin" | "agent" | "customer";
         session.user.mustChangePassword = token.mustChangePassword as boolean;
         session.user.isPhoneVerified = token.isPhoneVerified as boolean;
+        session.user.aadhaarNumber = token.aadhaarNumber as string;
+        session.user.passportNumber = token.passportNumber as string;
       }
       return session;
     },
@@ -148,13 +157,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const baseObj = new URL(baseUrl);
         // Allow same origin
         if (urlObj.origin === baseObj.origin) return url;
-        // Allow subdomains of the base domain (e.g. portals.localhost when base is localhost)
-        if (
-          urlObj.hostname.endsWith(`.${baseObj.hostname}`) &&
-          urlObj.port === baseObj.port
-        ) {
-          return url;
-        }
       } catch {
         // Invalid URL, fall through to baseUrl
       }

@@ -49,12 +49,10 @@ interface ActionButtonsProps {
 const STAGES = [
   "new",
   "contacted",
-  "qualified",
+  "booked",
   "proposal_sent",
   "negotiation",
-  "won",
-  "lost",
-  "stale",
+  "dropped",
 ];
 
 export function ActionButtons({

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function AgentProfilePage() {
   const session = await auth();
   if (!session?.user) {
-    redirect("/admin/login");
+    redirect("/");
   }
 
   const profile = await getAgentProfile();
