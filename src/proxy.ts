@@ -18,6 +18,7 @@ export async function proxy(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: isProduction,
   });
 
   // 1. If customer is logged into portal, send them to the landing dashboard
