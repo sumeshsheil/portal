@@ -272,7 +272,7 @@ export function TripInfoManager({
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-emerald-600 hover:bg-emerald-700 h-9"
+                className="bg-emerald-600 hover:bg-emerald-700 h-9 text-black"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

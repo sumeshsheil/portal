@@ -159,7 +159,7 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                                 {agent.isVerified && (
                                   <Badge
                                     variant="outline"
-                                    className="bg-emerald-50 text-emerald-600 border-emerald-200 py-0 h-4 text-[10px]"
+                                    className="bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 py-0 h-4 text-[10px]"
                                   >
                                     Verified
                                   </Badge>
@@ -177,8 +177,8 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                               }
                               className={
                                 agent.status === "active"
-                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80 border-emerald-200"
-                                  : "bg-slate-100 text-slate-700 hover:bg-slate-100/80 border-slate-200"
+                                  ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/80 border-emerald-200 dark:border-emerald-800"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-700"
                               }
                             >
                               {agent.status}

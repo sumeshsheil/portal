@@ -44,7 +44,29 @@ interface SubscriptionClientProps {
   user: any;
 }
 
-const PLANS = [
+interface Plan {
+  name: string;
+  id: string;
+  price: string;
+  period?: string;
+  description: string;
+  features: string[];
+  buttonText: string;
+  isCurrent: (plan: string) => boolean;
+  highlight: boolean;
+  icon: React.ReactNode | null;
+  accentColor: string;
+  payout: string | null;
+  fullWidth?: boolean;
+  badge?: string;
+  isEnterprise?: boolean;
+  enterpriseColumns?: {
+    title: string;
+    items: string[];
+  }[];
+}
+
+const PLANS: Plan[] = [
   {
     name: "Free",
     id: "free",
@@ -69,7 +91,7 @@ const PLANS = [
     description: "For growing agents",
     features: [
       "100 Leads (Contacts)",
-      "10 Packages",
+      "Add Packages (Coming Soon)",
       "5 Hot Enquiries Daily",
     ],
     buttonText: "Upgrade to Basic",
@@ -87,7 +109,7 @@ const PLANS = [
     description: "Most popular choice",
     features: [
       "Unlimited Leads",
-      "30 Packages",
+      "Add Packages (Coming Soon)",
       "10 Hot Enquiries Daily",
     ],
     buttonText: "Upgrade to Pro",
@@ -105,7 +127,7 @@ const PLANS = [
     description: "For established agencies",
     features: [
       "Unlimited Leads",
-      "Unlimited Packages",
+      "Add Packages (Coming Soon)",
       "15 Hot Enquiries Daily",
     ],
     buttonText: "Upgrade to Premium",
@@ -121,10 +143,32 @@ const PLANS = [
     price: "₹1,49,000",
     period: "/year",
     description: "All access with live support",
-    features: [
-      "Unlimited Leads & Packages",
-      "15 Hot Enquiries Daily",
-      "Live Calls & Chats"
+    features: [],
+    enterpriseColumns: [
+      {
+        title: "Enterprise Plan Benefits",
+        items: [
+          "Domestic & International Leads",
+          "15+ High-Intent Leads Daily",
+          "Priority Support"
+        ]
+      },
+      {
+        title: "Growth & Connectivity",
+        items: [
+          "Add Unlimited Travel Leads",
+          "Direct Customer Calls/Chat",
+          "Real-Time Lead Notifications"
+        ]
+      },
+      {
+        title: "Coming Soon...",
+        items: [
+          "Featured Agent Badge",
+          "Unlimited Package Listings",
+          "Priority Marketplace Ranking"
+        ]
+      }
     ],
     buttonText: "Upgrade to Enterprise",
     isCurrent: (plan: string) => plan === "enterprise",
@@ -241,7 +285,7 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
         {/* Plan Comparison */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr mt-12">
           {PLANS.filter(p => p.id !== "free").map((plan) => {
-            const isEnterprise = (plan as any).isEnterprise;
+            const isEnterprise = plan.isEnterprise;
             return (
               <motion.div
                 key={plan.name}
@@ -249,13 +293,13 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className={`relative overflow-hidden rounded-[2.5rem] border-2 flex flex-col transition-all duration-500 group ${
                   isEnterprise
-                    ? "border-slate-800 dark:border-slate-800 bg-slate-950 shadow-2xl shadow-emerald-500/10"
+                    ? "border-slate-800 dark:border-slate-800 bg-yellow-500 shadow-2xl shadow-emerald-500/10"
                     : plan.highlight 
-                    ? "border-emerald-500 shadow-2xl shadow-emerald-500/20 z-10 bg-linear-to-b from-slate-900 to-slate-950" 
+                    ? "border-emerald-500 shadow-2xl shadow-emerald-500/20 bg-linear-to-b from-slate-900 to-slate-950" 
                     : plan.isCurrent(userPlan)
                     ? "border-emerald-500/50 shadow-lg bg-white dark:bg-slate-900"
                     : "border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800 bg-white dark:bg-slate-900"
-                } ${(plan as any).fullWidth ? "md:col-span-2 lg:col-span-3" : ""}`}
+                } ${plan.fullWidth ? "md:col-span-2 lg:col-span-3" : ""}`}
               >
                 {/* Enterprise Shimmer Border Effect */}
                 {isEnterprise && (
@@ -332,24 +376,44 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
 
                 {/* Features */}
                 <div className="relative z-10 flex-1 p-8 pt-6">
-                  <ul className="space-y-4">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-4 group/item">
-                        <div className={`h-6 w-6 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover/item:scale-110 ${
-                          isEnterprise
-                            ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
-                            : plan.highlight 
-                            ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400" 
-                            : "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800"
-                        }`}>
-                          <Check className="h-3.5 w-3.5 stroke-[4px]" />
+                  {isEnterprise && plan.enterpriseColumns ? (
+                    <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-4 w-full">
+                      {plan.enterpriseColumns.map((col: any, idx: number) => (
+                        <div key={idx} className="flex-1 space-y-4">
+                          <h4 className="font-bold text-amber-400 text-sm uppercase tracking-widest">{col.title}</h4>
+                          <ul className="space-y-3">
+                            {col.items.map((item: string) => (
+                              <li key={item} className="flex items-start gap-3 group/item">
+                                <div className="h-5 w-5 rounded-md mt-0.5 flex items-center justify-center shrink-0 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+                                  <Check className="h-3 w-3 stroke-[3px]" />
+                                </div>
+                                <span className="text-sm font-semibold tracking-wide text-slate-300 leading-snug">
+                                  {item}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <span className={`text-sm font-semibold tracking-wide ${isEnterprise ? "text-slate-300" : plan.highlight ? "text-slate-300" : "text-slate-700 dark:text-slate-300"}`}>
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                      ))}
+                    </div>
+                  ) : (
+                    <ul className="space-y-4">
+                      {plan.features.map((feature: string) => (
+                        <li key={feature} className="flex items-center gap-4 group/item">
+                          <div className={`h-6 w-6 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover/item:scale-110 ${
+                            plan.highlight 
+                              ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400" 
+                              : "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800"
+                          }`}>
+                            <Check className="h-3.5 w-3.5 stroke-[4px]" />
+                          </div>
+                          <span className={`text-sm font-semibold tracking-wide ${plan.highlight ? "text-slate-300" : "text-slate-700 dark:text-slate-300"}`}>
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 {/* Footer Button Section */}

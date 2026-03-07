@@ -127,7 +127,7 @@ export function ActionButtons({
           {/* Admin Self-Assignment Button */}
           {isAdmin && agentId !== currentUserId && (
             <Button
-              className="w-full gap-2 h-11 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg font-semibold"
+              className="w-full gap-2 h-11 bg-emerald-600 hover:bg-emerald-700 text-black shadow-lg font-semibold"
               onClick={() => handleAgentChange(currentUserId)}
               disabled={loading}
             >
@@ -139,7 +139,7 @@ export function ActionButtons({
             className={cn(
               "w-full gap-2 h-11 text-base font-semibold transition-all",
               isReadyToWin
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none"
+                ? "bg-emerald-600 hover:bg-emerald-700 text-black shadow-lg shadow-emerald-200 dark:shadow-none"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border-dashed border-2 border-slate-200 dark:border-slate-700",
             )}
             onClick={handleMarkAsWon}

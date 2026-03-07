@@ -201,7 +201,7 @@ export function PaymentManager({
                             }
                             className={cn(
                               "text-[10px] h-5",
-                              payment.status === "verified" && "bg-emerald-500 hover:bg-emerald-600",
+                              payment.status === "verified" && "bg-emerald-500 hover:bg-emerald-600 text-black",
                               payment.status === "pending" && "text-amber-600 border-amber-200"
                             )}
                           >
@@ -242,7 +242,7 @@ export function PaymentManager({
                     {isAdmin && payment.status === "pending" && (
                       <div className="flex items-center gap-2 pt-2">
                         <Button 
-                          className="flex-1 h-9 bg-emerald-600 hover:bg-emerald-700 font-bold"
+                          className="flex-1 h-9 bg-emerald-600 hover:bg-emerald-700 font-bold text-black"
                           disabled={isPending}
                           onClick={() => handleVerify(payment._id)}
                         >
@@ -272,10 +272,16 @@ export function PaymentManager({
                       </div>
                     )}
 
-                    {payment.status === "verified" && (
+                    {payment.status === "verified" && payment.verifiedAt && (
                       <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        Verified on {format(new Date(payment.verifiedAt!), "MMM d")}
+                        Verified on {(() => {
+                          try {
+                            return format(new Date(payment.verifiedAt), "MMM d");
+                          } catch (e) {
+                            return "Unknown Date";
+                          }
+                        })()}
                       </div>
                     )}
                   </div>

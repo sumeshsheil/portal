@@ -51,7 +51,7 @@ export function KanbanColumn({ stage, leads }: KanbanColumnProps) {
             />
             <h3 className="font-semibold text-sm">{STAGE_LABELS[stage]}</h3>
           </div>
-          <Badge variant="secondary" className="text-xs h-5 px-1.5 font-normal">
+          <Badge className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold h-5 min-w-[20px] flex items-center justify-center px-1.5 rounded-full border-none shadow-sm">
             {leads.length}
           </Badge>
         </div>

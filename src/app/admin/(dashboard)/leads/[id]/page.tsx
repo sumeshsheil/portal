@@ -35,6 +35,7 @@ import { AgentIdentityCard } from "@/components/admin/leads/lead-detail/AgentIde
 import { CustomerHistoryCard } from "@/components/admin/leads/lead-detail/CustomerHistoryCard";
 import { LeadCommentsCard } from "@/components/admin/leads/lead-detail/LeadCommentsCard";
 import { CopyableBadge } from "@/components/admin/leads/lead-detail/CopyableBadge";
+import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getLeadActivities } from "./activity-actions";
 
@@ -170,18 +171,18 @@ export default async function LeadDetailPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+      <div className="flex items-start gap-2 sm:gap-4">
+        <Button variant="ghost" size="icon" asChild className="shrink-0 mt-1 h-8 w-8">
           <Link href="/admin/leads">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight truncate">
               {lead.travelers?.[0]?.name || "Unknown Traveler"}
             </h1>
-            <Badge variant="outline" className="capitalize ml-2">
+            <Badge variant="outline" className="capitalize w-fit text-[10px] sm:text-xs">
               {lead.stage === "new"
                 ? "Inquiry Received"
                 : lead.stage === "contacted"
@@ -195,13 +196,15 @@ export default async function LeadDetailPage({
                         : lead.stage.replace("_", " ")}
             </Badge>
           </div>
-          <div className="text-muted-foreground flex items-center gap-2 text-sm mt-1">
+          <div className="text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-y-1 sm:gap-x-2 text-xs sm:text-sm mt-1.5">
             <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span>{lead.destination}</span>
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{lead.destination}</span>
             </div>
-            <span className="text-slate-300 mx-1">|</span>
-            <span>ID: {lead._id.toString()}</span>
+            <span className="hidden sm:inline text-slate-300 mx-1">|</span>
+            <span className="truncate text-[10px] sm:text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded sm:bg-transparent sm:p-0">
+              ID: {lead._id.toString()}
+            </span>
           </div>
         </div>
       </div>
@@ -264,7 +267,10 @@ export default async function LeadDetailPage({
                         <p className="font-semibold">{traveler.name}</p>
                         <Badge
                           variant={idx === 0 ? "default" : "secondary"}
-                          className="text-[10px] h-5"
+                          className={cn(
+                            "text-[10px] h-5",
+                            idx === 0 && "bg-emerald-500 hover:bg-emerald-600 text-black border-none"
+                          )}
                         >
                           {idx === 0 ? "Primary Traveler" : "Companion"}
                         </Badge>
@@ -500,7 +506,9 @@ export default async function LeadDetailPage({
 
           {/* Agent Identity Card (Admin Only) */}
           {lead.agentId && session.user.role === "admin" && (
-            <AgentIdentityCard agent={lead.agentId as any} />
+            <AgentIdentityCard
+              agent={JSON.parse(JSON.stringify(lead.agentId))}
+            />
           )}
 
           <Card>

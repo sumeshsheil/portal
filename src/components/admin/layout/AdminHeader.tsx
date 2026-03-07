@@ -25,15 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   getUnreadNotifications,
@@ -57,7 +50,7 @@ const NOTIFICATION_COLORS = {
   error: "text-red-500",
 };
 
-export function AdminHeader() {
+export function AdminHeader(): React.JSX.Element {
   const { data: session } = useSession();
   const user = session?.user;
   const router = useRouter();
@@ -110,44 +103,12 @@ export function AdminHeader() {
         .slice(0, 2)
     : "U";
 
-  // Breadcrumbs generation
-  const paths = pathname?.split("/").filter((p) => p) || [];
-  const breadcrumbs = paths.map((path, index) => {
-    const href = `/${paths.slice(0, index + 1).join("/")}`;
-    const label = path.charAt(0).toUpperCase() + path.slice(1);
-    const isLast = index === paths.length - 1;
-    return { href, label, isLast };
-  });
-
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-background/50 backdrop-blur-md sticky top-0 z-10 border-b border-sidebar-border/50">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb className="hidden md:block">
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            {breadcrumbs.length > 1 && (
-              <BreadcrumbSeparator className="hidden md:block" />
-            )}
-            {breadcrumbs.slice(1).map((item) => (
-              <React.Fragment key={item.href}>
-                <BreadcrumbItem>
-                  {item.isLast ? (
-                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink href={item.href}>
-                      {item.label}
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                {!item.isLast && <BreadcrumbSeparator />}
-              </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Breadcrumbs />
       </div>
 
       <div className="flex items-center gap-2">

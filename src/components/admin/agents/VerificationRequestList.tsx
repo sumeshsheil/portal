@@ -153,7 +153,7 @@ export function VerificationRequestList({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className="capitalize bg-amber-50 text-amber-700 border-amber-200"
+                      className="capitalize bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
                     >
                       {request.verificationStatus}
                     </Badge>
@@ -184,7 +184,7 @@ export function VerificationRequestList({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 px-2">
                           <div className="space-y-8">
                             <div>
-                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
                                 <User className="h-5 w-5" /> Travel Partner Details
                               </h4>
                               <div className="flex items-center gap-4 mb-4">
@@ -200,7 +200,7 @@ export function VerificationRequestList({
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <p className="font-bold text-slate-900">
+                                  <p className="font-bold text-slate-900 dark:text-white">
                                     {request.name}
                                   </p>
                                   <p className="text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ export function VerificationRequestList({
                                   </p>
                                 </div>
                               </div>
-                              <div className="space-y-3 text-[15px] text-slate-800">
+                              <div className="space-y-3 text-[15px] text-slate-800 dark:text-slate-200">
                                 <p>
                                   <span className="text-muted-foreground w-16 inline-block">
                                     Phone:
@@ -219,11 +219,11 @@ export function VerificationRequestList({
                             </div>
 
                             <div>
-                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                              <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
                                 <ShieldAlert className="h-5 w-5" />{" "}
                                 Identification
                               </h4>
-                              <div className="space-y-3 text-[15px] text-slate-800">
+                              <div className="space-y-3 text-[15px] text-slate-800 dark:text-slate-200">
                                 <p>
                                   <span className="text-muted-foreground w-20 inline-block">
                                     Aadhaar:
@@ -241,12 +241,12 @@ export function VerificationRequestList({
                           </div>
 
                           <div className="space-y-4">
-                            <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900">
+                            <h4 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
                               <FileText className="h-5 w-5" /> Documents
                             </h4>
                             <div className="space-y-4">
-                              <div className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
-                                <p className="text-[15px] font-bold mb-3 text-slate-900">
+                              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                                <p className="text-[15px] font-bold mb-3 text-slate-900 dark:text-white">
                                   Aadhaar Card
                                 </p>
                                 {request.documents?.aadharCard?.[0] ? (
@@ -269,8 +269,8 @@ export function VerificationRequestList({
                                   </span>
                                 )}
                               </div>
-                              <div className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
-                                <p className="text-[15px] font-bold mb-3 text-slate-900">
+                              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                                <p className="text-[15px] font-bold mb-3 text-slate-900 dark:text-white">
                                   PAN Card
                                 </p>
                                 {request.documents?.panCard?.[0] ? (
@@ -298,7 +298,7 @@ export function VerificationRequestList({
                         </div>
 
                         <div className="space-y-3 pb-4">
-                          <Label className="text-base font-semibold text-slate-900">
+                          <Label className="text-base font-semibold text-slate-900 dark:text-white">
                             Admin Notes / Feedback (Optional)
                           </Label>
                           <Textarea

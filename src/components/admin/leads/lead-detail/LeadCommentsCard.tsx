@@ -142,7 +142,7 @@ export function LeadCommentsCard({
                         </Button>
                         <Button
                           size="sm"
-                          className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white"
+                          className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-black"
                           onClick={() => handleUpdateComment(comment._id!)}
                           disabled={isPending}
                         >
@@ -229,7 +229,7 @@ export function LeadCommentsCard({
             <Button
               onClick={handleAddComment}
               disabled={!newComment.trim() || disabled || isPending}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm font-semibold h-10 px-6 rounded-lg"
+              className="bg-emerald-500 hover:bg-emerald-600 text-black shadow-sm font-semibold h-10 px-6 rounded-lg"
             >
               {isPending ? (
                 "Adding..."
