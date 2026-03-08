@@ -14,7 +14,6 @@ const openSans = Open_Sans({
 });
 
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
-import { FloatingButtons } from "@/components/layout/FloatingButtons";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { AppThemeProvider } from "@/components/providers/AppThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -28,7 +27,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://budgettravelpackages.in"),
+  metadataBase: new URL("https://portal.budgettravelpackages.in"),
   title: {
     default: "Book Domestic & International Tour Packages from India",
     template: "%s | Budget Travel Packages",
@@ -53,9 +52,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: "/images/logo/logo.svg",
-    shortcut: "/images/logo/logo.svg",
-    apple: "/images/logo/logo.svg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
   openGraph: {
     title: "Budget Travel Packages - Customized Tours",
