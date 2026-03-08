@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { getWelcomeEmailHtml, getLeadConfirmationEmailHtml } from "./email-templates";
+import { getWelcomeEmailHtml, getLeadConfirmationEmailHtml, getAgentWelcomeEmailHtml } from "./email-templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -628,10 +628,11 @@ export async function sendAgentApprovalEmail({
   agentEmail: string;
 }) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: HELLO_EMAIL,
+    // 1. Welcome Aboard email from NOREPLY
+    const resAboard = await resend.emails.send({
+      from: NOREPLY_EMAIL,
       to: [agentEmail],
-      subject: "Welcome! Your Agent Account is Approved - Budget Travel Packages 🎉",
+      subject: "Welcome Aboard! Your Agent Account is Approved 🎉",
       html: `
         <div style="${styles.container}">
           <div style="${styles.header}">
@@ -640,28 +641,38 @@ export async function sendAgentApprovalEmail({
           <div style="${styles.body}">
             <h2 style="${styles.h2}">Hello ${agentName},</h2>
             <p style="${styles.p}">Great news! We have successfully reviewed your documents and approved your agent verification request.</p>
-            
             <p style="${styles.p}">Your account is now fully active. You can log into your admin dashboard to start managing your trips, leads, and clients.</p>
-            
             <div style="text-align: center; margin: 30px 0;">
               <a href="${process.env.NEXTAUTH_URL}/" style="${styles.button}">Access Dashboard</a>
             </div>
-            
             <p style="${styles.p}">Warm regards,<br/>The Budget Travel Team</p>
           </div>
           <div style="${styles.footer}">
-             <p>If you have questions, reply to this email.</p>
+             <p>This is an automated message. Please do not reply.</p>
              <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
           </div>
         </div>
       `,
     });
 
-    if (error) {
-      console.error("Resend Error (Agent Approval):", error);
-      return { success: false, error };
+    if (resAboard.error) {
+      console.error("Resend Error (Welcome Aboard):", resAboard.error);
     }
-    return { success: true, data };
+
+    // 2. Personalized Welcome email from HELLO
+    const resWelcome = await resend.emails.send({
+      from: HELLO_EMAIL,
+      to: [agentEmail],
+      subject: "Welcome to the Team - Budget Travel Packages! 🌍",
+      html: getAgentWelcomeEmailHtml(agentName),
+    });
+
+    if (resWelcome.error) {
+      console.error("Resend Error (Agent Welcome):", resWelcome.error);
+      return { success: false, error: resWelcome.error };
+    }
+
+    return { success: true, data: resWelcome.data };
   } catch (error) {
     console.error("Email Exception (Agent Approval):", error);
     return { success: false, error };
@@ -817,3 +828,67 @@ export async function sendPaymentStatusNotification({
     return { success: false, error };
   }
 }
+
+// 12. Send Travel Document (PDF) Upload Notification
+export async function sendTravelDocumentEmail({
+  to,
+  name,
+  destination,
+  pdfUrl,
+}: {
+  to: string;
+  name: string;
+  destination: string;
+  pdfUrl: string;
+}) {
+  try {
+    const html = `
+      <div style="${styles.container}">
+        <div style="${styles.header}">
+          <h1 style="${styles.headerTitle}">Your Travel Documents</h1>
+        </div>
+        <div style="${styles.body}">
+          <h2 style="${styles.h2}">Hello ${name},</h2>
+          <p style="${styles.p}">Great news! Your official travel documents and tickets for your upcoming trip to <strong style="${styles.accentText}">${destination}</strong> have been finalized.</p>
+          
+          <div style="${styles.dataBox}">
+            <p style="${styles.p}">You can download or view your comprehensive itinerary and necessary documents by clicking the link below:</p>
+            <div style="text-align: center; margin-top: 20px;">
+              <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" style="${styles.button}">View Travel Documents (PDF)</a>
+            </div>
+          </div>
+
+          <p style="${styles.p}">Please review the documents carefully. You can also always access them securely by logging into your Budget Travel Packages dashboard.</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/dashboard/bookings" style="color: #666; text-decoration: underline; font-size: 14px;">Log in to your dashboard</a>
+          </div>
+
+          <p style="${styles.p}">Wishing you a wonderful trip ahead!</p>
+          <p style="${styles.p}">Best regards,<br/>The Budget Travel Team</p>
+        </div>
+        <div style="${styles.footer}">
+           <p>This email was sent from <strong>booking@budgettravelpackages.in</strong></p>
+           <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+
+    const { data, error } = await resend.emails.send({
+      from: BOOKINGS_EMAIL,
+      to: [to],
+      subject: `Your Travel Documents for ${destination} ✈️`,
+      html,
+    });
+
+    if (error) {
+      console.error("Resend Error (Travel Documents):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Travel Documents):", error);
+    return { success: false, error };
+  }
+}
+

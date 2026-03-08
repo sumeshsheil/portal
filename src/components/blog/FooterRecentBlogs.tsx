@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { decodeHtmlEntities } from "@/lib/wordpress/utils";
 
 interface RecentPost {
   slug: string;
@@ -62,7 +63,7 @@ export default function FooterRecentBlogs() {
             <div className="relative w-16 h-12 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border border-gray-200/50">
               <Image
                 src={extractImage(post)}
-                alt={post.title.rendered.replace(/<[^>]+>/g, "")}
+                alt={decodeHtmlEntities(post.title.rendered.replace(/<[^>]+>/g, ""))}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="80px"
@@ -71,7 +72,7 @@ export default function FooterRecentBlogs() {
 
             {/* Title */}
             <p className="text-xs md:text-sm font-medium text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-snug font-open-sans">
-              {post.title.rendered.replace(/<[^>]+>/g, "")}
+              {decodeHtmlEntities(post.title.rendered.replace(/<[^>]+>/g, ""))}
             </p>
           </Link>
         ))}

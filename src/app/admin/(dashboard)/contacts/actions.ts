@@ -101,13 +101,18 @@ export async function createCustomerAccount(formData: FormData) {
       return { success: false, error: "Your current plan does not support creating platform user accounts." };
     }
 
-    const name = formData.get("name")?.toString();
+    const firstName = formData.get("firstName")?.toString();
+    const lastName = formData.get("lastName")?.toString();
+    const name = `${firstName || ""} ${lastName || ""}`.trim();
     const email = formData.get("email")?.toString();
     const phone = formData.get("phone")?.toString();
+    const altPhone = formData.get("altPhone")?.toString();
+    const age = formData.get("age")?.toString();
+    const gender = formData.get("gender")?.toString();
     const notes = formData.get("notes")?.toString();
 
-    if (!name) {
-      return { success: false, error: "Name is required" };
+    if (!firstName || !lastName) {
+      return { success: false, error: "First and last name are required" };
     }
     if (!email) {
       return { success: false, error: "Email is required to create a platform account" };
@@ -150,12 +155,19 @@ export async function createCustomerAccount(formData: FormData) {
     user = await User.create({
       email: normalizedEmail,
       name: name,
+      firstName,
+      lastName,
+      phone,
+      altPhone: altPhone || undefined,
+      age: age ? Number(age) : undefined,
+      gender,
       password: hashedPassword,
       role: "customer",
       status: "active",
       isVerified: true,
       isPhoneVerified: false,
       isActivated: true,
+      mustChangePassword: true,
       setPasswordToken: hashedToken,
       setPasswordExpires: tokenExpires,
     });

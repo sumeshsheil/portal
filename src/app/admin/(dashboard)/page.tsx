@@ -196,7 +196,7 @@ export default async function DashboardPage() {
                     <div className="ml-auto flex flex-col items-end gap-1">
                       <Badge
                         variant="secondary"
-                        className="capitalize text-[10px] h-5"
+                        className="capitalize text-[10px] text-white h-5"
                       >
                         {lead.stage === "new"
                           ? "Inquiry Received"

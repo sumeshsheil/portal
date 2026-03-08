@@ -13,21 +13,12 @@ import User from "@/lib/db/models/User";
 const MC_BASE_URL = "https://cpaas.messagecentral.com";
 const MC_CUSTOMER_ID = process.env.MC_CUSTOMER_ID!;
 
-/**
- * POST /api/otp/verify
- * Validates an OTP using MessageCentral Verify Now (validateOtp endpoint)
- *
- * Body: { verificationId: string, otp: string, phone: string, countryCode?: string }
- * Returns: { success: true, verified: true }
- */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { verificationId, otp, phone, countryCode = "91" } = body;
 
-    // --- TEST MODE BYPASS ---
     if (isTestVerification(verificationId, otp)) {
-      // Still persist to DB for logged-in users
       const session = await auth();
       if (session?.user?.id) {
         await connectDB();
@@ -38,7 +29,6 @@ export async function POST(request: Request) {
       return NextResponse.json(getTestVerifyResponse());
     }
 
-    // Validate inputs
     if (!verificationId || typeof verificationId !== "string") {
       return NextResponse.json(
         { error: "Invalid verification session" },
@@ -60,17 +50,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Get cached auth token
     const authToken = await getAuthToken();
 
-    // 2. Validate OTP via MessageCentral (GET /validateOtp)
-    //    Matches the exact MC dashboard code format
     const validateUrl = `${MC_BASE_URL}/verification/v3/validateOtp?countryCode=${countryCode}&mobileNumber=${phone}&verificationId=${encodeURIComponent(verificationId)}&customerId=${encodeURIComponent(MC_CUSTOMER_ID)}&code=${encodeURIComponent(otp)}`;
 
-    console.log(
-      "MC Validate OTP:",
-      validateUrl.replace(/code=\d+/, "code=****"),
-    );
+
 
     const validateRes = await fetch(validateUrl, {
       method: "GET",
@@ -79,12 +63,10 @@ export async function POST(request: Request) {
 
     const validateJson = await validateRes.json();
 
-    // Handle specific response codes
     if (
       validateJson.responseCode === 200 &&
       validateJson.data?.verificationStatus === "VERIFICATION_COMPLETED"
     ) {
-      // If user is logged in, update their verification status
       const session = await auth();
       if (session?.user?.id) {
         await connectDB();
@@ -99,9 +81,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // Also accept plain 200 without status field
     if (validateJson.responseCode === 200) {
-      // If user is logged in, update their verification status
       const session = await auth();
       if (session?.user?.id) {
         await connectDB();
@@ -116,7 +96,6 @@ export async function POST(request: Request) {
       });
     }
 
-    // Error handling based on MessageCentral response codes
     const errorMessage =
       MC_ERROR_MESSAGES[validateJson.responseCode] ||
       validateJson.message ||

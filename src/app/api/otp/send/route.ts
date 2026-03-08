@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     // 2. Send OTP via MessageCentral Verify Now (minimal params)
     const sendUrl = `${MC_BASE_URL}/verification/v3/send?countryCode=${countryCode}&customerId=${encodeURIComponent(MC_CUSTOMER_ID)}&flowType=SMS&mobileNumber=${phone}`;
 
-    console.log("MC Send OTP:", sendUrl);
+
 
     const sendRes = await fetch(sendUrl, {
       method: "POST",

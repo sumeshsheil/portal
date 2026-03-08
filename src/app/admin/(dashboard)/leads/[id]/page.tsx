@@ -81,16 +81,18 @@ export default async function LeadDetailPage({
 
   if (!lead) return notFound();
 
-  // Access Control: Agents can only view their own leads
+  // Access Control: Agents can only view their own leads and CANNOT view won leads
   if (
     session.user.role === "agent" &&
-    lead.agentId?._id?.toString() !== session.user.id
+    (lead.agentId?._id?.toString() !== session.user.id || lead.stage === "won")
   ) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
         <h2 className="text-2xl font-bold">Access Denied</h2>
         <p className="text-muted-foreground">
-          You are not authorized to view this lead details.
+          {lead.stage === "won" 
+            ? "This lead has been confirmed and is no longer accessible to agents."
+            : "You are not authorized to view this lead details."}
         </p>
         <Button asChild>
           <Link href="/admin/leads">Return to Inquiries</Link>
@@ -460,6 +462,7 @@ export default async function LeadDetailPage({
           <ItineraryManager
             leadId={leadId}
             itineraryPdfUrl={lead.itineraryPdfUrl}
+            isWon={lead.stage === "won"}
           />
 
           {/* Payment Manager */}
@@ -476,6 +479,7 @@ export default async function LeadDetailPage({
           <DocumentManager
             leadId={leadId}
             travelDocumentsPdfUrl={lead.travelDocumentsPdfUrl}
+            isWon={lead.stage === "won"}
           />
         </div>
 

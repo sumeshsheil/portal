@@ -11,6 +11,9 @@ import {
   FileText,
   MapPin,
   ExternalLink,
+  CreditCard,
+  Banknote,
+  Smartphone,
 } from "lucide-react";
 
 import { DialogContent } from "@/components/ui/dialog";
@@ -40,6 +43,15 @@ interface Agent {
   };
   verificationStatus: string;
   isVerified: boolean;
+  image?: string;
+  bankDetails?: {
+    accountHolderName?: string;
+    accountNumber?: string;
+    bankName?: string;
+    ifscCode?: string;
+    branchName?: string;
+  };
+  upiId?: string;
   createdAt: string | Date;
 }
 
@@ -49,7 +61,7 @@ interface AgentDetailDialogProps {
 
 export function AgentDetailDialog({ agent }: AgentDetailDialogProps) {
   return (
-    <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto scrollbar-hide p-0 border-none bg-white dark:bg-slate-950 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <DialogContent data-lenis-prevent className="sm:max-w-4xl max-w-4xl w-[90%] max-h-[92vh] overflow-y-scroll overflow-x-hidden p-0 border-none bg-white dark:bg-slate-950 rounded-3xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 ">
       {/* Dynamic Header Section */}
       <div className="relative">
         <div className="h-32 bg-linear-to-br from-emerald-500 via-teal-600 to-cyan-700 dark:from-emerald-600 dark:via-teal-700 dark:to-cyan-800 opacity-90" />
@@ -69,9 +81,17 @@ export function AgentDetailDialog({ agent }: AgentDetailDialogProps) {
         <div className="absolute -bottom-14 left-6 md:left-10 flex items-end gap-6 w-full">
           <div className="relative group shrink-0">
             <div className="absolute inset-0 bg-emerald-500/20 blur-xl group-hover:bg-emerald-500/30 transition-all rounded-full" />
-            <div className="relative h-28 w-28 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center border-[6px] border-white dark:border-slate-950 shadow-2xl transform transition-transform hover:scale-105">
+            <div className="relative h-28 w-28 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center border-[6px] border-white dark:border-slate-950 shadow-2xl transform transition-transform hover:scale-105 overflow-hidden">
               <div className="h-full w-full rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-                <User className="h-14 w-14 text-slate-300 dark:text-slate-600" />
+                {agent.image ? (
+                  <img
+                    src={agent.image}
+                    alt={agent.name}
+                    className="h-full w-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <User className="h-14 w-14 text-slate-300 dark:text-slate-600" />
+                )}
               </div>
             </div>
           </div>
@@ -205,6 +225,76 @@ export function AgentDetailDialog({ agent }: AgentDetailDialogProps) {
                           agent.verificationStatus || "unverified"
                         ).toUpperCase()}
                       </Badge>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-600 flex items-center gap-2">
+                    <div className="w-6 h-[1.5px] bg-amber-500/30" />
+                    Payout & Bank Details
+                  </h3>
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800 animate-pulse">
+                    Coming Soon: More Methods
+                  </Badge>
+                </div>
+                
+                <div className="bg-slate-50/50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+                  {/* UPI Identification */}
+                  <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-800/30">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 shrink-0 bg-amber-100 dark:bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-200 dark:border-amber-500/20 shadow-sm">
+                        <Smartphone className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">UPI ID</span>
+                        <span className="text-base font-black text-slate-900 dark:text-slate-100 tracking-tight">{agent.upiId || "Not Provided"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bank Details Grid */}
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-linear-to-b from-transparent to-slate-50/30 dark:to-slate-900/10">
+                    <div className="flex gap-4">
+                      <div className="h-9 w-9 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <User className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Holder Name</span>
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{agent.bankDetails?.accountHolderName || "—"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="h-9 w-9 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <CreditCard className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Account Number</span>
+                        <span className="text-sm font-mono font-bold text-slate-800 dark:text-slate-200">{agent.bankDetails?.accountNumber || "—"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="h-9 w-9 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <Banknote className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Bank Name</span>
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{agent.bankDetails?.bankName || "—"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="h-9 w-9 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <ShieldCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">IFSC Code</span>
+                        <span className="text-sm font-mono font-bold text-slate-800 dark:text-slate-200 uppercase">{agent.bankDetails?.ifscCode || "—"}</span>
+                      </div>
                     </div>
                   </div>
                 </div>

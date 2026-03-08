@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput"; // Reusing search input
 import { ExportCustomersButton } from "@/components/admin/customers/ExportCustomersButton";
+import { CreateCustomerDialog } from "@/components/admin/customers/CreateCustomerDialog";
 
 export const metadata: Metadata = {
   title: "Leads | Budget Travel Packages",
@@ -92,7 +93,10 @@ export default async function CustomersPage({
             A list of all users registered as leads.
           </p>
         </div>
-        <ExportCustomersButton customers={exportData} />
+        <div className="flex items-center gap-2">
+          <CreateCustomerDialog />
+          <ExportCustomersButton customers={exportData} />
+        </div>
       </div>
 
       <Card>
@@ -107,8 +111,11 @@ export default async function CustomersPage({
         <CardContent>
           <div className="mb-4 flex items-center gap-2">
             <Suspense fallback={null}>
-              {/* Reusing the AgentSearchInput as it just updates the ?search= parameter in URL */}
-              <AgentSearchInput defaultValue={search} />
+              <AgentSearchInput 
+                defaultValue={search} 
+                targetPath="/admin/customers" 
+                placeholder="Search leads..."
+              />
             </Suspense>
           </div>
 

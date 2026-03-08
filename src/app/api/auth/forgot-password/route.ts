@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     // Send OTP via Email
     await sendOtpEmail({ email, otp });
-    console.log(`Password reset OTP for ${email}: ${otp}`); // Keep log for dev backup
+
 
     return NextResponse.json({
       success: true,

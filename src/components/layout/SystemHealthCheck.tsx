@@ -60,23 +60,11 @@ export default function SystemHealthCheck() {
               ? "warn"
               : "log";
 
-        console[method](
-          `%c[Budget Travel] ${label} `,
-          styles[result.status as keyof typeof styles] || styles.error,
-          result.message,
-        );
-        console.table(result.envCheck);
-
         if (result.error) {
           console.groupCollapsed("Server Error Details");
           console.error(result.error);
           console.groupEnd();
         }
-
-        console.log(
-          `%cTimestamp: ${result.timestamp}`,
-          "color: #64748b; font-size: 10px;",
-        );
       } catch (error) {
         console.error(
           "%c[Budget Travel] ❌ Health check fetch failed ",

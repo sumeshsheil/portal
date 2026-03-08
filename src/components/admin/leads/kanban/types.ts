@@ -36,6 +36,7 @@ export interface KanbanLead {
   }[];
 }
 
+// Board pipeline columns
 export const LEAD_STAGES: LeadStage[] = [
   "new",
   "contacted",

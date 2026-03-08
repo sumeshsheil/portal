@@ -17,8 +17,10 @@ export interface FinanceStats {
 
 export interface FinanceFilters {
   tripType: "all" | "domestic" | "international";
-  period: "current_month" | "last_month" | "last_3_months" | "year";
+  period: "current_month" | "last_month" | "last_3_months" | "last_6_months" | "year" | "last_year" | "all_time" | "custom";
   agentId?: string;
+  dateFrom?: string; // ISO date string for custom range
+  dateTo?: string;   // ISO date string for custom range
 }
 
 export async function getFinanceStats(filters: FinanceFilters) {
@@ -57,8 +59,29 @@ export async function getFinanceStats(filters: FinanceFilters) {
         case "last_3_months":
           query.createdAt = { ...query.createdAt, $gte: subMonths(now, 3) };
           break;
+        case "last_6_months":
+          query.createdAt = { ...query.createdAt, $gte: subMonths(now, 6) };
+          break;
         case "year":
           query.createdAt = { ...query.createdAt, $gte: new Date(now.getFullYear(), 0, 1) };
+          break;
+        case "last_year":
+          query.createdAt = { 
+            ...query.createdAt, 
+            $gte: new Date(now.getFullYear() - 1, 0, 1), 
+            $lte: new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59) 
+          };
+          break;
+        case "custom":
+          if (filters.dateFrom) {
+            query.createdAt = { ...query.createdAt, $gte: startOfDay(new Date(filters.dateFrom)) };
+          }
+          if (filters.dateTo) {
+            query.createdAt = { ...query.createdAt, $lte: endOfDay(new Date(filters.dateTo)) };
+          }
+          break;
+        case "all_time":
+          // No date filter
           break;
       }
     }
@@ -70,7 +93,7 @@ export async function getFinanceStats(filters: FinanceFilters) {
 
     const stats = wonLeads.reduce(
       (acc, lead: any) => {
-        acc.totalSales += 1;
+        acc.totalSales += lead.tripCost || 0;
         acc.totalNet += lead.netAmount || 0;
         acc.totalEarning += lead.tripProfit || 0;
         return acc;

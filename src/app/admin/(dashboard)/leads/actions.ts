@@ -299,6 +299,16 @@ export async function assignAgent(leadId: string, agentId: string) {
 
     await connectDB();
 
+    const lead = await Lead.findById(leadId);
+    if (!lead) return { success: false, error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return {
+        success: false,
+        error: "Cannot change agent for a confirmed trip.",
+      };
+    }
+
     // Validate leadId
     if (!mongoose.Types.ObjectId.isValid(leadId)) {
       return { success: false, error: "Invalid lead ID" };
@@ -448,8 +458,24 @@ export async function bulkAssignAgents(leadIds: string[], agentId: string) {
 
     const objectLeadIds = leadIds.map((id) => new mongoose.Types.ObjectId(id));
 
+    // Filter out won leads to prevent reassignment
+    const leadsToUpdate = await Lead.find({
+      _id: { $in: objectLeadIds },
+      stage: { $ne: "won" },
+    });
+
+    if (leadsToUpdate.length === 0) {
+      return {
+        success: false,
+        error:
+          "No assignable leads selected (confirmed trips cannot be reassigned)",
+      };
+    }
+
+    const filteredLeadIds = leadsToUpdate.map((l) => l._id);
+
     await Lead.updateMany(
-      { _id: { $in: objectLeadIds } },
+      { _id: { $in: filteredLeadIds } },
       {
         agentId: isUnassigning ? null : new mongoose.Types.ObjectId(agentId),
         lastActivityAt: new Date(),
@@ -457,9 +483,9 @@ export async function bulkAssignAgents(leadIds: string[], agentId: string) {
     );
 
     // Log activity for each lead
-    for (const leadId of leadIds) {
+    for (const leadId of filteredLeadIds) {
       await logLeadActivity({
-        leadId,
+        leadId: leadId.toString(),
         userId: session.user.id,
         action: isUnassigning ? "agent_unassigned" : "agent_assigned",
         details: isUnassigning

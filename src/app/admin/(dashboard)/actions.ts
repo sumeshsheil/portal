@@ -35,9 +35,9 @@ const createCustomerSchema = z.object({
   lastName: z.string().min(2, "Last name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  altPhone: z.string().optional().or(z.literal("")),
-  age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Age must be valid",
+  altPhone: z.string().optional().nullable(),
+  age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 18, {
+    message: "Age must be 18 or older",
   }),
   gender: z.string().refine((val) => ["male", "female", "other"].includes(val), {
     message: "Gender is required",
@@ -187,7 +187,7 @@ export async function createCustomer(prevState: unknown, formData: FormData) {
       lastName: formData.get("lastName"),
       email: formData.get("email"),
       phone: formData.get("phone"),
-      altPhone: formData.get("altPhone"),
+      altPhone: formData.get("altPhone") || null,
       age: formData.get("age"),
       gender: formData.get("gender"),
     };

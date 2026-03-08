@@ -36,6 +36,7 @@ export interface KanbanLead {
   }[];
 }
 
+// Board pipeline columns (won is hidden from board — auto-set via "Mark as Won" button)
 export const LEAD_STAGES: LeadStage[] = [
   "new",
   "contacted",

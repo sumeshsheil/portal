@@ -87,9 +87,7 @@ export async function POST(request: Request) {
     if (session?.user?.id) {
       const authenticatedUser = await User.findById(session.user.id);
       if (authenticatedUser && !authenticatedUser.isPhoneVerified) {
-        console.log(
-          `[Lead Submit] Blocked: authenticated user ${session.user.id} has not verified phone`,
-        );
+
         return NextResponse.json(
           {
             error:
@@ -104,8 +102,6 @@ export async function POST(request: Request) {
     const { primaryContact, ...rest } = validatedData;
     const customerEmail = primaryContact.email.toLowerCase();
 
-    console.log(`[Lead Submit] Processing lead for email: ${customerEmail}`);
-
     let customer = await User.findOne({
       email: customerEmail,
       role: "customer",
@@ -113,13 +109,11 @@ export async function POST(request: Request) {
     let setPasswordUrl: string | undefined;
 
     if (customer) {
-      console.log(`[Lead Submit] Found existing customer: ${customer._id}`);
       // No automatic phone verification for existing customers here.
       // They must already be verified in the DB from the OTP flow.
     }
 
     if (!customer) {
-      console.log(`[Lead Submit] Creating new customer account...`);
       // Generate a secure set-password token
       const rawToken = crypto.randomBytes(32).toString("hex");
       const hashedToken = crypto
@@ -146,7 +140,6 @@ export async function POST(request: Request) {
           setPasswordExpires: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
         });
 
-        console.log(`[Lead Submit] Created new customer: ${customer._id}`);
         setPasswordUrl = `${process.env.NEXTAUTH_URL}/dashboard/set-password?token=${rawToken}`;
       } catch (createError: unknown) {
         // Handle duplicate email (user may exist with different role)
@@ -155,9 +148,6 @@ export async function POST(request: Request) {
           "code" in createError &&
           (createError as { code: number }).code === 11000
         ) {
-          console.log(
-            `[Lead Submit] Duplicate email, finding existing user...`,
-          );
           customer = await User.findOne({ email: customerEmail });
         } else {
           throw createError;
@@ -177,7 +167,6 @@ export async function POST(request: Request) {
 
     // 5. Create lead linked to customer
     const customerId = customer._id;
-    console.log(`[Lead Submit] Creating lead with customerId: ${customerId}`);
 
     const { travelers: submittedTravelers, ...restWithoutPrimary } = rest;
 
@@ -213,10 +202,6 @@ export async function POST(request: Request) {
         { $set: { customerId: customerId } },
       );
     }
-
-    console.log(
-      `[Lead Submit] Lead ${lead._id} created with customerId: ${lead.customerId}`,
-    );
 
     // Log activity
     await logLeadActivity({

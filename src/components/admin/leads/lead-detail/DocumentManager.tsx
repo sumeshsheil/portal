@@ -11,9 +11,11 @@ import { toast } from "sonner";
 export function DocumentManager({
   leadId,
   travelDocumentsPdfUrl,
+  isWon,
 }: {
   leadId: string;
   travelDocumentsPdfUrl?: string;
+  isWon?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -75,7 +77,7 @@ export function DocumentManager({
             accept="application/pdf"
             maxFiles={1}
             folder="/lead-documents"
-            disabled={isPending}
+            disabled={isPending || isWon}
           />
         </div>
       </CardContent>

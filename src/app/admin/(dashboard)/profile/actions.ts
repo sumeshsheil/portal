@@ -14,6 +14,14 @@ export async function updateAgentProfile(formData: {
   aadhaarNumber: string;
   panNumber: string;
   image?: string;
+  bankDetails?: {
+    accountHolderName?: string;
+    accountNumber?: string;
+    bankName?: string;
+    ifscCode?: string;
+    branchName?: string;
+  };
+  upiId?: string;
 }) {
   const session = await auth();
   if (!session?.user?.id || session.user.role !== "agent") {
@@ -33,6 +41,17 @@ export async function updateAgentProfile(formData: {
     user.aadhaarNumber = formData.aadhaarNumber;
     user.panNumber = formData.panNumber;
     if (formData.image) user.image = formData.image;
+    if (formData.bankDetails) {
+      user.bankDetails = {
+        accountHolderName: formData.bankDetails.accountHolderName || "",
+        accountNumber: formData.bankDetails.accountNumber || "",
+        bankName: formData.bankDetails.bankName || "",
+        ifscCode: formData.bankDetails.ifscCode || "",
+        branchName: formData.bankDetails.branchName || "",
+      };
+      user.markModified("bankDetails");
+    }
+    if (formData.upiId) user.upiId = formData.upiId;
 
     await user.save();
 

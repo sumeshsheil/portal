@@ -15,6 +15,8 @@ import {
   MapPin,
   Calendar,
   Mail,
+  Smartphone,
+  Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -59,17 +61,18 @@ const profileSchema = z.object({
   phone: z.string().min(10, "Invalid phone number"),
   age: z.number().min(18, "Must be at least 18 years old").max(100),
   gender: z.enum(["male", "female", "other"]),
-  address: z.string().min(10, "Address must be at least 10 characters"),
-  aadhaarNumber: z
-    .string()
-    .regex(/^\d{12}$/, "Invalid Aadhaar number (12 digits)"),
-  panNumber: z
-    .string()
-    .regex(
-      /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-      "Invalid PAN number (e.g., ABCDE1234F)",
-    ),
+  address: z.string().min(3, "Address must be at least 3 characters"),
+  aadhaarNumber: z.string().min(10, "Aadhaar must be at least 10 characters"),
+  panNumber: z.string().min(10, "PAN must be at least 10 characters"),
   image: z.string().optional(),
+  bankDetails: z.object({
+    accountHolderName: z.string().optional(),
+    accountNumber: z.string().optional(),
+    bankName: z.string().optional(),
+    ifscCode: z.string().optional(),
+    branchName: z.string().optional(),
+  }).optional(),
+  upiId: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -104,6 +107,14 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
       aadhaarNumber: initialData.aadhaarNumber || "",
       panNumber: initialData.panNumber || "",
       image: initialData.image || "",
+      bankDetails: {
+        accountHolderName: initialData.bankDetails?.accountHolderName || "",
+        accountNumber: initialData.bankDetails?.accountNumber || "",
+        bankName: initialData.bankDetails?.bankName || "",
+        ifscCode: initialData.bankDetails?.ifscCode || "",
+        branchName: initialData.bankDetails?.branchName || "",
+      },
+      upiId: initialData.upiId || "",
     },
   });
 
@@ -218,7 +229,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                 maxFiles={1}
                 folder="/agent-profiles"
                 accept="image/*"
-                disabled={true}
+                disabled={isPending}
               />
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 Your professional agent profile photo.
@@ -237,7 +248,13 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form className="space-y-6">
+              <form 
+                onSubmit={form.handleSubmit(onProfileSubmit, (errors) => {
+                  console.error("Form Validation Errors:", errors);
+                  toast.error("Please fix the validation errors in the form.");
+                })} 
+                className="space-y-6"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Name */}
                   <FormField
@@ -252,7 +269,6 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
-                              disabled
                             />
                           </div>
                         </FormControl>
@@ -289,7 +305,6 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
-                              disabled
                             />
                           </div>
                         </FormControl>
@@ -312,7 +327,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                               className="pl-9"
                               type="number"
                               {...field}
-                              disabled
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             />
                           </div>
                         </FormControl>
@@ -331,7 +346,6 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          disabled
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -362,7 +376,48 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
-                              disabled
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Aadhaar Number */}
+                  <FormField
+                    control={form.control}
+                    name="aadhaarNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Aadhaar Number (12 Digits)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              className="pl-9"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* PAN Number */}
+                  <FormField
+                    control={form.control}
+                    name="panNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>PAN Number (e.g. ABCDE1234F)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              className="pl-9 uppercase"
+                              {...field}
                             />
                           </div>
                         </FormControl>
@@ -411,6 +466,153 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <Separator className="md:col-span-2" />
+
+                {/* Payout Details Section */}
+                <div className="md:col-span-2 space-y-6 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h4 className="text-base font-black flex items-center gap-2 text-slate-900 dark:text-white">
+                        <div className="h-5 w-5 bg-amber-500 rounded-lg flex items-center justify-center text-[11px] text-white font-black shadow-sm">₹</div> 
+                        Payout & Bank Details
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Required for automated payouts. Keep this information accurate.
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800 font-bold text-[10px] uppercase tracking-tighter animate-pulse">
+                      Coming Soon: More Methods
+                    </Badge>
+                  </div>
+
+                  <div className="bg-slate-50/50 dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-8">
+                    {/* UPI Section */}
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                        <Smartphone className="h-3 w-3" /> UPI Identification
+                      </Label>
+                      <FormField
+                        control={form.control}
+                        name="upiId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Input 
+                                  placeholder="e.g. username@okhdfcbank" 
+                                  className="h-12 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl font-medium focus-visible:ring-amber-500 transition-all shadow-xs"
+                                  {...field} 
+                                />
+                                <div className="absolute right-3 top-3.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-100 dark:border-emerald-900">
+                                  ACTIVE
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormDescription className="text-[10px]">
+                              Verify your UPI ID before saving.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Bank Details Grid */}
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                        <Banknote className="h-3 w-3" /> Bank Account Details
+                      </Label>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <FormField
+                          control={form.control}
+                          name="bankDetails.accountHolderName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Account Holder Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Name as per Passbook" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="bankDetails.accountNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Account Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter Account Number" className="font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="bankDetails.bankName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Bank Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. HDFC Bank" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="bankDetails.ifscCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">IFSC Code</FormLabel>
+                              <FormControl>
+                                <Input placeholder="HDFC0001234" className="uppercase font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="bankDetails.branchName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Branch Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. Downtown Branch" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end md:col-span-2 pt-4">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[150px]"
+                  >
+                    {isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    Save Profile Changes
+                  </Button>
                 </div>
               </form>
             </Form>

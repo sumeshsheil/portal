@@ -36,8 +36,8 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use env variable or default to 4MB
-  const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB) || 4;
+  // Enforce 1MB max upload size
+  const maxMb = 1;
   const maxSizeBytes = maxMb * 1024 * 1024;
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

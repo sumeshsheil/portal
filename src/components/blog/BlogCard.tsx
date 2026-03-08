@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { Post } from "@/lib/wordpress/types";
-import { extractFeaturedImage } from "@/lib/wordpress/utils";
+import { extractFeaturedImage, decodeHtmlEntities } from "@/lib/wordpress/utils";
 
 interface BlogCardProps {
   post: Post;
@@ -29,11 +29,13 @@ export default function BlogCard({ post, className }: BlogCardProps) {
 
   const title = post.title.rendered;
   const description =
-    post.excerpt.rendered
-      .replace(/<[^>]+>/g, "")
-      .split(" ")
-      .slice(0, 20)
-      .join(" ") + "...";
+    decodeHtmlEntities(
+      post.excerpt.rendered
+        .replace(/<[^>]+>/g, "")
+        .split(" ")
+        .slice(0, 20)
+        .join(" "),
+    ) + "...";
 
   const image = extractFeaturedImage(post);
 

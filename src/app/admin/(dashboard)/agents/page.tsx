@@ -26,6 +26,7 @@ import { AgentActions } from "@/components/admin/agents/AgentActions";
 import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VerificationRequestList } from "@/components/admin/agents/VerificationRequestList";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const metadata: Metadata = {
   title: "Travel Partner Management | Budget Travel Packages",
@@ -153,18 +154,30 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                       agents.map((agent) => (
                         <TableRow key={agent._id.toString()}>
                           <TableCell className="font-medium">
-                            <div className="flex flex-col">
-                              <span className="flex items-center gap-2">
-                                {agent.name}
-                                {agent.isVerified && (
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 py-0 h-4 text-[10px]"
-                                  >
-                                    Verified
-                                  </Badge>
-                                )}
-                              </span>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-800">
+                                <AvatarImage
+                                  src={agent.image}
+                                  alt={agent.name}
+                                  className="object-cover"
+                                />
+                                <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                                  {agent.name?.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="flex items-center gap-2">
+                                  {agent.name}
+                                  {agent.isVerified && (
+                                    <Badge
+                                      variant="outline"
+                                      className="bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 py-0 h-4 text-[10px]"
+                                    >
+                                      Verified
+                                    </Badge>
+                                  )}
+                                </span>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>{agent.email}</TableCell>

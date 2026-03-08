@@ -11,9 +11,11 @@ import { toast } from "sonner";
 export function ItineraryManager({
   leadId,
   itineraryPdfUrl,
+  isWon,
 }: {
   leadId: string;
   itineraryPdfUrl?: string;
+  isWon?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -75,7 +77,7 @@ export function ItineraryManager({
             accept="application/pdf"
             maxFiles={1}
             folder="/lead-itineraries"
-            disabled={isPending}
+            disabled={isPending || isWon}
           />
         </div>
       </CardContent>

@@ -7,9 +7,15 @@ import { Input } from "@/components/ui/input";
 
 interface AgentSearchInputProps {
   defaultValue?: string;
+  targetPath?: string;
+  placeholder?: string;
 }
 
-export function AgentSearchInput({ defaultValue = "" }: AgentSearchInputProps) {
+export function AgentSearchInput({ 
+  defaultValue = "", 
+  targetPath = "/admin/agents",
+  placeholder = "Search travel partners..."
+}: AgentSearchInputProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -25,10 +31,10 @@ export function AgentSearchInput({ defaultValue = "" }: AgentSearchInputProps) {
         } else {
           params.delete("search");
         }
-        router.push(`/admin/agents?${params.toString()}`);
+        router.push(`${targetPath}?${params.toString()}`);
       }, 300); // 300ms debounce per Rule 12
     },
-    [router, searchParams],
+    [router, searchParams, targetPath],
   );
 
   useEffect(() => {
@@ -41,7 +47,7 @@ export function AgentSearchInput({ defaultValue = "" }: AgentSearchInputProps) {
     <div className="relative flex-1 max-w-sm">
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
-        placeholder="Search travel partners..."
+        placeholder={placeholder}
         className="pl-8"
         defaultValue={defaultValue}
         onChange={(e) => handleSearch(e.target.value)}

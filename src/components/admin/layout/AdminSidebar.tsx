@@ -16,6 +16,7 @@ import {
   CreditCard,
   LogOut,
   ChevronsUpDown,
+  HelpCircle,
 } from "lucide-react";
 
 import {
@@ -121,6 +122,13 @@ export function AdminAppSidebar() {
               isActive: pathname === "/admin/subscription",
               items: [],
             },
+            {
+              title: "Help",
+              url: "/admin/help",
+              icon: HelpCircle,
+              isActive: pathname === "/admin/help",
+              items: [],
+            },
           ]
         : []),
     ],
@@ -145,13 +153,6 @@ export function AdminAppSidebar() {
             url: "/admin/subscriptions",
             icon: CreditCard,
             isActive: pathname.startsWith("/admin/subscriptions"),
-            items: [],
-          },
-          {
-            title: "System Settings",
-            url: "/admin/settings",
-            icon: Settings,
-            isActive: pathname.startsWith("/admin/settings"),
             items: [],
           },
         ]
@@ -299,10 +300,17 @@ export function AdminAppSidebar() {
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/profile" className="flex items-center gap-2">
+                  {isAdmin ? (
+                    <Link href="/admin/settings" className="flex items-center gap-2">
+                    <Settings className="size-4" />
+                    <span>System Settings</span>
+                  </Link>
+                  ) : (
+                    <Link href="/admin/profile" className="flex items-center gap-2">
                     <UserCircle className="size-4" />
                     <span>View Profile</span>
                   </Link>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

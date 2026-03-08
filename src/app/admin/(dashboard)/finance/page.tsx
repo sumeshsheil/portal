@@ -58,8 +58,8 @@ export default function FinancePage() {
   const cards = [
     {
       title: "Total Sales",
-      value: stats.totalSales.toString(),
-      subtitle: "From platform (Won leads)",
+      value: `₹${stats.totalSales.toLocaleString("en-IN")}`,
+      subtitle: "Gross revenue (Won leads)",
       icon: Briefcase,
       color: "text-blue-600",
       bg: "bg-blue-50",

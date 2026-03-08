@@ -17,7 +17,7 @@ const STAGE_COLORS: Record<LeadStage, string> = {
   booked: "bg-emerald-500",
   proposal_sent: "bg-indigo-500",
   negotiation: "bg-orange-500",
-  won: "bg-emerald-500",
+  won: "bg-emerald-600",
   dropped: "bg-red-500",
   abandoned: "bg-gray-500",
 };
@@ -51,7 +51,7 @@ export function KanbanColumn({ stage, leads }: KanbanColumnProps) {
             />
             <h3 className="font-semibold text-sm">{STAGE_LABELS[stage]}</h3>
           </div>
-          <Badge className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold h-5 min-w-[20px] flex items-center justify-center px-1.5 rounded-full border-none shadow-sm">
+          <Badge className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold h-6 w-6 flex items-center justify-center p-0 rounded-full border-none shadow-sm shrink-0">
             {leads.length}
           </Badge>
         </div>

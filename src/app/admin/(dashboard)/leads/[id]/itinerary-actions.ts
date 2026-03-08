@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import Lead from "@/lib/db/models/Lead";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { deleteFileFromImageKit } from "@/lib/imagekit";
 
 // ============ AUTH HELPER ============
 
@@ -127,10 +128,18 @@ export async function updateLeadItineraryPdf(
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
 
+    const oldUrl = lead.itineraryPdfUrl;
     lead.itineraryPdfUrl = itineraryPdfUrl;
     lead.lastActivityAt = new Date();
 
     await lead.save();
+
+    // Delete old file if it exists and is different
+    if (oldUrl && oldUrl !== itineraryPdfUrl) {
+
+      await deleteFileFromImageKit(oldUrl);
+    }
+
     revalidatePath(`/admin/leads/${leadId}`);
     revalidatePath(`/dashboard/bookings/${leadId}`);
 

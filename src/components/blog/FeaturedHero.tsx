@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 
 import { Post } from "@/lib/wordpress/types";
-import { extractFeaturedImage } from "@/lib/wordpress/utils";
+import { extractFeaturedImage, decodeHtmlEntities } from "@/lib/wordpress/utils";
 
 interface FeaturedHeroProps {
   post: Post;
@@ -13,7 +13,7 @@ interface FeaturedHeroProps {
 
 export default function FeaturedHero({ post }: FeaturedHeroProps) {
   const title = post.title.rendered;
-  const description = post.excerpt.rendered.replace(/<[^>]+>/g, "");
+  const description = decodeHtmlEntities(post.excerpt.rendered.replace(/<[^>]+>/g, ""));
 
   const image = extractFeaturedImage(post);
 

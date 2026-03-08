@@ -82,10 +82,11 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
   };
 
   const toggleAll = () => {
-    if (selectedIds.length === leads.length) {
+    const activeLeads = leads.filter((l) => l.stage !== "won");
+    if (selectedIds.length === activeLeads.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(leads.map((l) => l._id));
+      setSelectedIds(activeLeads.map((l) => l._id));
     }
   };
 
@@ -206,6 +207,7 @@ export function LeadTable({ leads, agents, isAdmin }: LeadTableProps) {
                       <Checkbox
                         checked={selectedIds.includes(lead._id)}
                         onCheckedChange={() => toggleSelect(lead._id)}
+                        disabled={lead.stage === "won"}
                         aria-label={`Select ${lead.travelers?.[0]?.name}`}
                       />
                     </TableCell>

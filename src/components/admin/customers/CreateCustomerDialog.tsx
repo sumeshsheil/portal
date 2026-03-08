@@ -42,9 +42,9 @@ const formSchema = z.object({
   lastName: z.string().min(2, "Last name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  altPhone: z.string().optional(),
-  age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Age must be valid",
+  altPhone: z.string().optional().or(z.literal("")),
+  age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 18, {
+    message: "Age must be 18 or older",
   }),
   gender: z.enum(["male", "female", "other"]),
 });
@@ -82,7 +82,9 @@ export function CreateCustomerDialog({
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        if (value) formData.append(key, value);
+        if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
       });
 
       const result = await createCustomer(null, formData);
@@ -188,7 +190,7 @@ export function CreateCustomerDialog({
                 name="altPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Alt Phone</FormLabel>
+                    <FormLabel>Alt Phone <span className="text-xs text-muted-foreground font-normal">(Optional)</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Optional" {...field} />
                     </FormControl>

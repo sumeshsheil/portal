@@ -168,7 +168,7 @@ export default async function LeadsPage({
     if (stageFilter !== "all") p.set("stage", stageFilter);
     if (tripTypeFilter !== "all") p.set("type", tripTypeFilter);
     if (search) p.set("search", search);
-    if (view !== "list") p.set("view", view);
+    if (view) p.set("view", view);
     if (targetPage > 1) p.set("page", targetPage.toString());
     const qs = p.toString();
     return `/admin/leads${qs ? `?${qs}` : ""}`;

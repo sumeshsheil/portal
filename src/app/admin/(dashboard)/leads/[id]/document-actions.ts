@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/db/mongoose";
 import Lead from "@/lib/db/models/Lead";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { deleteFileFromImageKit } from "@/lib/imagekit";
+import { sendTravelDocumentEmail } from "@/lib/email";
 
 // ============ AUTH HELPER ============
 
@@ -32,12 +34,34 @@ export async function updateLeadTravelDocumentsPdf(
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
 
+    const oldUrl = lead.travelDocumentsPdfUrl;
     lead.travelDocumentsPdfUrl = travelDocumentsPdfUrl;
     lead.lastActivityAt = new Date();
 
     await lead.save();
+
+    // Delete old file if it exists and is different
+    if (oldUrl && oldUrl !== travelDocumentsPdfUrl) {
+
+      await deleteFileFromImageKit(oldUrl);
+    }
+
     revalidatePath(`/admin/leads/${leadId}`);
     revalidatePath(`/dashboard/bookings/${leadId}`);
+
+    // Send email to customer if it's an upload (not a removal)
+    if (travelDocumentsPdfUrl && oldUrl !== travelDocumentsPdfUrl) {
+      const primaryTraveler = lead.travelers?.[0];
+      if (primaryTraveler && primaryTraveler.email) {
+        // Run asynchronously so it doesn't block the UI response
+        sendTravelDocumentEmail({
+          to: primaryTraveler.email,
+          name: primaryTraveler.name || "Customer",
+          destination: lead.destination || "your destination",
+          pdfUrl: travelDocumentsPdfUrl,
+        }).catch(err => console.error("Failed to send document email:", err));
+      }
+    }
 
     return {
       success: true,
@@ -53,11 +77,66 @@ export async function updateLeadTravelDocumentsPdf(
 }
 
 export async function addDocument(leadId: string, formData: FormData) {
-  // Skeleton implementation to fix build error
-  return { error: "Not implemented yet." };
+  try {
+    await verifyAgentOrAdminSession();
+    await connectDB();
+
+    const lead = await Lead.findById(leadId);
+    if (!lead) return { error: "Lead not found" };
+
+    const name = formData.get("name")?.toString();
+    const url = formData.get("url")?.toString();
+    const type = formData.get("type")?.toString();
+
+    if (!name || !url || !type) {
+      return { error: "Missing document details" };
+    }
+
+    lead.documents = lead.documents || [];
+    lead.documents.push({
+      name,
+      url,
+      type: type as any,
+      uploadedAt: new Date(),
+    });
+
+    lead.lastActivityAt = new Date();
+    await lead.save();
+
+    revalidatePath(`/admin/leads/${leadId}`);
+    return { success: true, message: "Document added successfully" };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : "Failed to add document" };
+  }
 }
 
 export async function removeDocument(leadId: string, index: number) {
-  // Skeleton implementation to fix build error
-  return { error: "Not implemented yet." };
+  try {
+    await verifyAgentOrAdminSession();
+    await connectDB();
+
+    const lead = await Lead.findById(leadId);
+    if (!lead) return { error: "Lead not found" };
+
+    if (!lead.documents || !lead.documents[index]) {
+      return { error: "Document not found" };
+    }
+
+    const doc = lead.documents[index];
+    
+    // Delete from ImageKit
+
+    await deleteFileFromImageKit(doc.url);
+
+    // Remove from array
+    lead.documents.splice(index, 1);
+    
+    lead.lastActivityAt = new Date();
+    await lead.save();
+
+    revalidatePath(`/admin/leads/${leadId}`);
+    return { success: true, message: "Document removed successfully" };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : "Failed to remove document" };
+  }
 }

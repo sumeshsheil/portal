@@ -61,7 +61,7 @@ export default function Newsletter() {
           <div className="absolute inset-0 bg-white/40 backdrop-blur-xs"></div>
 
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-black text-secondary mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-black text-secondary-text mb-4 tracking-tight">
               Get Travel Deals
             </h2>
             <p className="text-gray-800 text-base md:text-lg mb-10 max-w-md mx-auto font-medium">

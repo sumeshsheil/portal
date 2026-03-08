@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
         
         {/* Left Side: 65% width */}
         <div className="w-full xl:w-[65%] flex flex-col justify-center p-4 sm:p-8 xl:p-12">
-          <div className="max-w-2xl mx-auto xl:mx-0 text-black space-y-3 xl:space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
+          <div className="max-w-2xl mx-auto xl:mx-0 text-black space-y-3 xl:space-y-4">
             <div className="space-y-1.5 text-center xl:text-left">
               <p className="text-base sm:text-lg text-slate-800 leading-relaxed font-medium">
                 Start your travel business from home. Get domestic & international
@@ -137,7 +137,7 @@ export default function AdminLoginPage() {
 
         {/* Right Side: 35% width */}
         <div className="w-full xl:w-[35%] flex items-center justify-center p-4 sm:p-8 relative z-10">
-          <div className="w-full max-w-[380px] animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="w-full max-w-[380px]">
             <div className="mb-4 text-center xl:hidden text-black">
               <h2 className="text-2xl font-bold">Partner Portal</h2>
               <p className="text-slate-700 text-sm mt-0.5">Sign in to your account</p>

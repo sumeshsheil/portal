@@ -264,7 +264,7 @@ export function ActionButtons({
           <Select
             value={agentId}
             onValueChange={handleAgentChange}
-            disabled={loading}
+            disabled={loading || isWon}
           >
             <SelectTrigger className="w-full bg-background">
               <SelectValue placeholder="Assign agent" />
