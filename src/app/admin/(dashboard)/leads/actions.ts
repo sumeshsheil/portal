@@ -1,15 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { connectDB } from "@/lib/db/mongoose";
+import { auth } from "@/lib/auth";
 import Lead from "@/lib/db/models/Lead";
 import User from "@/lib/db/models/User";
-import { auth } from "@/lib/auth";
-import mongoose from "mongoose";
-import { z } from "zod";
+import { connectDB } from "@/lib/db/mongoose";
+import { sendLeadAssignmentEmail } from "@/lib/email";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { createNotification } from "@/lib/notifications";
-import { sendLeadAssignmentEmail } from "@/lib/email";
+import mongoose from "mongoose";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 // ============ AUTH HELPER ============
 
@@ -215,6 +215,14 @@ export async function updateLeadStage(leadId: string, newStage: string) {
     const lead = await Lead.findById(leadId);
     if (!lead) return { success: false, error: "Lead not found" };
 
+    // Prevent changing stage if lead is already won (except maybe by super admin if ever implemented)
+    if (lead.stage === "won" && newStage !== "won") {
+      return {
+        success: false,
+        error: "Confirmed trips cannot be moved back to other stages.",
+      };
+    }
+
     // === BUSINESS LOGIC CONSTRAINTS FOR 'WON' STAGE ===
     if (newStage === "won") {
       // 1. Check Trip Cost
@@ -399,17 +407,16 @@ export async function deleteLead(leadId: string) {
       return { success: false, error: "Only admins can delete leads" };
     }
 
-    await connectDB();
-
-    // Validate leadId
-    if (!mongoose.Types.ObjectId.isValid(leadId)) {
-      return { success: false, error: "Invalid lead ID" };
-    }
-
-    const lead = await Lead.findByIdAndDelete(leadId);
+    const lead = await Lead.findById(leadId);
     if (!lead) {
       return { success: false, error: "Lead not found" };
     }
+
+    if (lead.stage === "won") {
+      return { success: false, error: "Cannot delete a lead that has been marked as Won." };
+    }
+
+    await Lead.findByIdAndDelete(leadId);
 
     revalidatePath("/admin/leads");
     return { success: true, message: "Lead deleted successfully" };
@@ -539,6 +546,10 @@ export async function refreshLeadTimer(leadId: string) {
     const lead = await Lead.findById(leadId);
     if (!lead) return { success: false, error: "Lead not found" };
 
+    if (lead.stage === "won") {
+      return { success: false, error: "Cannot edit a lead that has been marked as Won." };
+    }
+
     lead.stageUpdatedAt = new Date();
     lead.lastActivityAt = new Date();
     await lead.save();
@@ -577,6 +588,10 @@ export async function addLeadComment(leadId: string, text: string) {
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { success: false, error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { success: false, error: "Cannot add comments to a confirmed trip." };
+    }
 
     // Prevent previous agents from commenting if reassigned
     if (
@@ -641,6 +656,10 @@ export async function updateLeadComment(
     const lead = await Lead.findById(leadId);
     if (!lead) return { success: false, error: "Lead not found" };
 
+    if (lead.stage === "won") {
+      return { success: false, error: "Cannot edit comments on a confirmed trip." };
+    }
+
     const comment = (lead.comments as any[]).find(
       (c) => c._id.toString() === commentId,
     );
@@ -674,6 +693,10 @@ export async function deleteLeadComment(leadId: string, commentId: string) {
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { success: false, error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { success: false, error: "Cannot delete comments from a confirmed trip." };
+    }
 
     lead.comments = (lead.comments as any[]).filter(
       (c) => c._id.toString() !== commentId,

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
 import Lead from "@/lib/db/models/Lead";
 import LeadActivity from "@/lib/db/models/LeadActivity";
+import { connectDB } from "@/lib/db/mongoose";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // Ensure this route is not cached
 

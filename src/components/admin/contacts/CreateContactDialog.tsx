@@ -1,33 +1,33 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import * as z from "zod";
 
+import { createContact } from "@/app/admin/(dashboard)/contacts/actions";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
 } from "@/components/ui/dialog";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createContact } from "@/app/admin/(dashboard)/contacts/actions";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -80,7 +80,7 @@ export function CreateContactDialog({ canAddMore, currentPlan }: { canAddMore: b
         <DialogHeader>
           <DialogTitle>Add New Lead</DialogTitle>
           <DialogDescription>
-            Add a personal contact to your leads list.
+            Add a personal entry to your leads list.
           </DialogDescription>
         </DialogHeader>
 

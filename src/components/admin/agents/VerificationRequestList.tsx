@@ -1,43 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import {
-  Check,
-  X,
-  Eye,
-  Loader2,
-  FileText,
-  Smartphone,
-  User,
-  ShieldAlert,
+    Check, Eye, FileText, Loader2, ShieldAlert, User, X
 } from "lucide-react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { updateAgentVerificationStatus } from "@/app/admin/(dashboard)/agents/actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
+    Dialog,
+    DialogContent,
+    DialogDescription, DialogFooter, DialogHeader,
+    DialogTitle,
+    DialogTrigger
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { updateAgentVerificationStatus } from "@/app/admin/(dashboard)/agents/actions";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 interface VerificationRequest {
   _id: string;

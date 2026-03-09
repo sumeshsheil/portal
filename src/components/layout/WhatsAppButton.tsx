@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import Lottie from "lottie-react";
+import { useEffect, useState } from "react";
 
 export function WhatsAppButton() {
   const [animationData, setAnimationData] = useState<unknown>(null);

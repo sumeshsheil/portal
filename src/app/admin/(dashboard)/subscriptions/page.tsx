@@ -1,23 +1,23 @@
-import type { Metadata } from "next";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
-import { verifyAdmin } from "@/lib/auth-check";
+import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { verifyAdmin } from "@/lib/auth-check";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import type { Metadata } from "next";
 import { SubscriptionRequestActions } from "./SubscriptionRequestActions";
 
 export const metadata: Metadata = {
@@ -59,6 +59,7 @@ export default async function SubscriptionsPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Requested Plan</TableHead>
                   <TableHead>Billing Cycle</TableHead>
+                  <TableHead>Transaction ID</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -66,7 +67,7 @@ export default async function SubscriptionsPage() {
                 {pendingRequests.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="h-24 text-center text-muted-foreground"
                     >
                       No pending subscription requests found.
@@ -84,6 +85,11 @@ export default async function SubscriptionsPage() {
                       </TableCell>
                       <TableCell className="capitalize">
                         {request.billingCycle || "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        <code className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-mono">
+                          {request.transactionId || "N/A"}
+                        </code>
                       </TableCell>
                       <TableCell className="text-right">
                         <SubscriptionRequestActions 

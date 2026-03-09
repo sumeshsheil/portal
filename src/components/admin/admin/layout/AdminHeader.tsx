@@ -1,46 +1,41 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
-import { format } from "date-fns";
 import {
-  Bell,
-  LogOut,
-  User,
-  Info,
-  AlertCircle,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+    getUnreadNotifications,
+    markAllNotificationsRead,
+    markNotificationRead,
+    type NotificationItem
+} from "@/app/admin/(dashboard)/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { format } from "date-fns";
 import {
-  getUnreadNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  type NotificationItem,
-} from "@/app/admin/(dashboard)/actions";
+    AlertCircle, AlertTriangle, Bell, CheckCircle2, Info, LogOut,
+    User
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const NOTIFICATION_ICONS = {

@@ -1,20 +1,19 @@
 "use client";
-import Image from "next/image";
-import React, { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
-import MenuIcon from "../icons/Menu";
-import { motion, AnimatePresence } from "motion/react";
 import { Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
+import React, { Suspense, useEffect, useState } from "react";
+import MenuIcon from "../icons/Menu";
 
 import { searchBlogPosts, SearchResult } from "@/app/actions/blog-search";
+import { SOCIAL_LINKS } from "@/lib/constants";
 import { useDebouncedCallback } from "use-debounce";
-import FacebookIcon from "../icons/Facebook";
 import YoutubeIcon from "../icons/Youtube";
 import { Button } from "../ui/button";
-import { SOCIAL_LINKS } from "@/lib/constants";
 
 import { useSession } from "next-auth/react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "../auth/LoginModal";
 
 /**
@@ -36,8 +35,8 @@ function SearchParamsHandler({ onOpenLogin }: { onOpenLogin: () => void }) {
 }
 
 // Logos
-import logoPrimary from "@/../public/images/logo/logo.svg";
 import logoFooter from "@/../public/images/logo/footer-logo.svg";
+import logoPrimary from "@/../public/images/logo/logo.svg";
 
 const Header: React.FC = () => {
   const { data: session } = useSession();

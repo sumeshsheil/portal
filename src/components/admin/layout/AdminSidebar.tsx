@@ -1,46 +1,33 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import logoDark from "@/../public/images/logo/footer-logo.svg";
+import logo from "@/../public/images/logo/logo.svg";
+import {
+    ChevronsUpDown, CreditCard, FileText, HelpCircle, LayoutDashboard, LogOut, Plane, Settings, UserCircle, Users
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import logo from "@/../public/images/logo/logo.svg";
-import logoDark from "@/../public/images/logo/footer-logo.svg";
-import {
-  LayoutDashboard,
-  Users,
-  UserCircle,
-  FileText,
-  Settings,
-  Plane,
-  CreditCard,
-  LogOut,
-  ChevronsUpDown,
-  HelpCircle,
-} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  useSidebar,
-} from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion } from "motion/react";
-import { useTheme } from "next-themes";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar
+} from "@/components/ui/sidebar";
+import { motion } from "motion/react";
 import { signOut } from "next-auth/react";
 
 export function AdminAppSidebar() {
@@ -91,7 +78,7 @@ export function AdminAppSidebar() {
               items: [],
             },
             {
-              title: "Address Book",
+              title: "Leads",
               url: "/admin/contacts",
               icon: Users,
               isActive: pathname.startsWith("/admin/contacts"),
@@ -102,7 +89,7 @@ export function AdminAppSidebar() {
       ...(isAgent
         ? [
             {
-              title: "My Contacts",
+              title: "Leads",
               url: "/admin/contacts",
               icon: UserCircle,
               isActive: pathname.startsWith("/admin/contacts"),

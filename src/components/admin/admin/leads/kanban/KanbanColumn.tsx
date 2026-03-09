@@ -1,10 +1,10 @@
 "use client";
 
-import { useDroppable } from "@dnd-kit/core";
-import { KanbanLead, LeadStage } from "./types";
-import { KanbanCard } from "./KanbanCard";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useDroppable } from "@dnd-kit/core";
+import { KanbanCard } from "./KanbanCard";
+import { KanbanLead, LeadStage } from "./types";
 
 interface KanbanColumnProps {
   stage: LeadStage;

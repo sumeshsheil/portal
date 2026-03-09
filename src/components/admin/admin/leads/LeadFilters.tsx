@@ -1,14 +1,14 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
 import { Filter } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function LeadFilters() {
   const searchParams = useSearchParams();

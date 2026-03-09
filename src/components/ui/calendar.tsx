@@ -1,28 +1,26 @@
 "use client";
 
+import {
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon
+} from "lucide-react";
 import * as React from "react";
 import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
-import {
-  DayPicker,
-  getDefaultClassNames,
-  useDayPicker,
-  type DayButton,
-  type DropdownProps,
+    DayPicker,
+    getDefaultClassNames, type DayButton,
+    type DropdownProps
 } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 function Calendar({
   className,

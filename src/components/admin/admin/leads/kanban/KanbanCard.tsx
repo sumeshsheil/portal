@@ -1,14 +1,13 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
-import Image from "next/image";
-import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
-import { MapPin, Calendar, User as UserIcon, Banknote, CreditCard } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { KanbanLead } from "./types";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useDraggable } from "@dnd-kit/core";
+import { differenceInMinutes, format } from "date-fns";
+import { Banknote, Calendar, CreditCard, MapPin, User as UserIcon } from "lucide-react";
 import Link from "next/link";
+import { KanbanLead } from "./types";
 
 interface KanbanCardProps {
   lead: KanbanLead;

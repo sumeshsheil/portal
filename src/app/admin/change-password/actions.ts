@@ -1,10 +1,10 @@
 "use server";
 
+import { auth } from "@/lib/auth";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 import bcryptjs from "bcryptjs";
 import { z } from "zod";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
-import { auth } from "@/lib/auth";
 
 const changePasswordSchema = z
   .object({

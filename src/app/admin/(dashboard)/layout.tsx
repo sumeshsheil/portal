@@ -1,10 +1,10 @@
-import React from "react";
-import { Metadata } from "next";
-import { AdminAppSidebar } from "@/components/admin/layout/AdminSidebar";
-import { AdminHeader } from "@/components/admin/layout/AdminHeader";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { InactivityTracker } from "@/components/admin/InactivityTracker";
 import { AdminProviders } from "@/components/admin/AdminProviders";
+import { InactivityTracker } from "@/components/admin/InactivityTracker";
+import { AdminHeader } from "@/components/admin/layout/AdminHeader";
+import { AdminAppSidebar } from "@/components/admin/layout/AdminSidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Metadata } from "next";
+import React from "react";
 
 export const metadata: Metadata = {
   robots: {

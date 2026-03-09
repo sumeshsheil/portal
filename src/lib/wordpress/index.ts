@@ -1,10 +1,5 @@
 export {
-  getPosts,
-  getPostBySlug,
-  getFeaturedPosts,
-  getPostsByCategory,
-  getCategories,
-  searchPosts,
+    getCategories, getFeaturedPosts, getPostBySlug, getPosts, getPostsByCategory, searchPosts
 } from "./api";
-export type { Post, Category } from "./types";
+export type { Category, Post } from "./types";
 export { extractFeaturedImage } from "./utils";

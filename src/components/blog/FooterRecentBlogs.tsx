@@ -1,9 +1,9 @@
 "use client";
 
+import { decodeHtmlEntities } from "@/lib/wordpress/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { decodeHtmlEntities } from "@/lib/wordpress/utils";
 
 interface RecentPost {
   slug: string;

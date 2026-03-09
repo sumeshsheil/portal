@@ -1,23 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    addItineraryDay,
+    removeItineraryDay,
+    updateTripDetails
+} from "@/app/admin/(dashboard)/leads/[id]/itinerary-actions";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  MapPin,
-  Trash2,
-  Plus,
-  Loader2,
-  UtensilsCrossed,
-  Hotel,
-  Bus,
+    Bus, Hotel, Loader2, MapPin, Plus, Trash2, UtensilsCrossed
 } from "lucide-react";
-import {
-  addItineraryDay,
-  removeItineraryDay,
-  updateTripDetails,
-} from "@/app/admin/(dashboard)/leads/[id]/itinerary-actions";
+import { useState, useTransition } from "react";
 
 interface ItineraryDay {
   day: number;

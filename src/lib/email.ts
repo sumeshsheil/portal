@@ -1,12 +1,12 @@
 import { Resend } from "resend";
-import { getWelcomeEmailHtml, getLeadConfirmationEmailHtml, getAgentWelcomeEmailHtml } from "./email-templates";
+import { getAgentWelcomeEmailHtml, getLeadConfirmationEmailHtml, getWelcomeEmailHtml } from "./email-templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
 const BOOKINGS_EMAIL = "Budget Travel Packages <booking@budgettravelpackages.in>";
 const HELLO_EMAIL = "Budget Travel Packages <hello@budgettravelpackages.in>";
 const NOREPLY_EMAIL = "Budget Travel Packages <noreply@budgettravelpackages.in>";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "sm.sanny1235@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@budgettravelpackages.in";
 
 // --- Email Templates (Shared Styles) ---
 
@@ -451,7 +451,7 @@ export async function sendAgentOnboardingEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: HELLO_EMAIL,
+      from: NOREPLY_EMAIL,
       to: [to],
       subject: "Complete Your Agent Registration - Budget Travel Packages ✈️",
       html: `
@@ -572,7 +572,7 @@ export async function sendAgentRejectionEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: HELLO_EMAIL,
+      from: NOREPLY_EMAIL,
       to: [agentEmail],
       subject: "Action Required: Agent Verification Update - Budget Travel Packages",
       html: `
@@ -825,6 +825,142 @@ export async function sendPaymentStatusNotification({
     return { success: true, data };
   } catch (error) {
     console.error("Email Exception (Payment Status):", error);
+    return { success: false, error };
+  }
+}
+
+// 12. Send Final Document Upload Notification
+export async function sendFinalDocumentEmail({
+  name,
+  email,
+  destination,
+  tripDates,
+  dashboardUrl,
+}: {
+  name: string;
+  email: string;
+  destination: string;
+  tripDates: string;
+  dashboardUrl: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: BOOKINGS_EMAIL,
+      to: [email],
+      subject: `Your Trip to ${destination} is Confirmed! ✈️ Here is your itinerary`,
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">Trip Confirmed</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${name},</h2>
+            <p style="${styles.p}">Great news! The final documents and itinerary for your trip to <strong>${destination}</strong> have been uploaded.</p>
+            
+            <div style="${styles.dataBox}">
+              <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Destination:</strong> ${destination}</p>
+              <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Trip Dates:</strong> ${tripDates}</p>
+            </div>
+
+            <p style="${styles.p}">You can view, download, and print your complete itinerary PDF from your personal dashboard.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${dashboardUrl}" style="${styles.button}">View My Dashboard</a>
+            </div>
+
+            <p style="${styles.p}">If you have any last-minute questions, please reply to this email or contact your agent.</p>
+            <p style="${styles.p}">Have a wonderful trip!<br/>The Budget Travel Team</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>This email was sent from <strong>booking@budgettravelpackages.in</strong></p>
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Final Document):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Final Document):", error);
+    return { success: false, error };
+  }
+}
+
+// 13. Send Payout Status Notification to Agent
+export async function sendPayoutStatusEmail({
+  agentName,
+  agentEmail,
+  amount,
+  status,
+  adminNote,
+}: {
+  agentName: string;
+  agentEmail: string;
+  amount: number;
+  status: "Paid" | "decline";
+  adminNote?: string;
+}) {
+  try {
+    const isPaid = status === "Paid";
+    const subject = isPaid
+      ? `Payout Processed: ₹${amount.toLocaleString("en-IN")} ✅`
+      : `Payout Request Declined: ₹${amount.toLocaleString("en-IN")} ❌`;
+
+    const { data, error } = await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: [agentEmail],
+      subject,
+      html: `
+        <div style="${styles.container}">
+          <div style="${styles.header}">
+            <h1 style="${styles.headerTitle}">${isPaid ? "Payout Processed" : "Payout Declined"}</h1>
+          </div>
+          <div style="${styles.body}">
+            <h2 style="${styles.h2}">Hello ${agentName},</h2>
+            <p style="${styles.p}">
+              ${isPaid 
+                ? `Your payout request for <strong>₹${amount.toLocaleString("en-IN")}</strong> has been successfully processed.`
+                : `Your payout request for <strong>₹${amount.toLocaleString("en-IN")}</strong> has been declined.`
+              }
+            </p>
+            
+            <div style="${styles.dataBox}">
+              <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Amount:</strong> ₹${amount.toLocaleString("en-IN")}</p>
+              <p style="${styles.dataItem}"><strong style="width: 120px; display: inline-block;">Status:</strong> <span style="color: ${isPaid ? "#10b981" : "#ef4444"}; font-weight: 700; text-transform: uppercase;">${status}</span></p>
+            </div>
+
+            ${adminNote ? `
+              <div style="background-color: ${isPaid ? '#f0fdf4' : '#fff1f2'}; border: 1px solid ${isPaid ? '#bbf7d0' : '#fecdd3'}; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                <p style="color: ${isPaid ? '#166534' : '#be123c'}; font-weight: 700; margin-bottom: 8px;">Admin Note:</p>
+                <p style="color: ${isPaid ? '#166534' : '#be123c'}; margin: 0;">${adminNote}</p>
+              </div>
+            ` : ""}
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXTAUTH_URL}/admin/finance" style="${styles.button}">View Finance Dashboard</a>
+            </div>
+
+            <p style="${styles.p}">Best regards,<br/>The Budget Travel Team</p>
+          </div>
+          <div style="${styles.footer}">
+             <p>This is an automated notification. Please do not reply.</p>
+             <p>&copy; ${new Date().getFullYear()} Budget Travel Packages. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend Error (Payout Status):", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Email Exception (Payout Status):", error);
     return { success: false, error };
   }
 }

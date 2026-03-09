@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import backgroundImage from "@/../public/images/landing-bg.png";
 import { LoginForm } from "@/components/admin/auth/LoginForm";
 import { RegistrationModal } from "@/components/admin/auth/RegistrationModal";
 import { Briefcase, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import backgroundImage from "@/../public/images/landing-bg.png";
+import { useState } from "react";
 
 export default function AdminLoginPage() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);

@@ -1,8 +1,8 @@
 "use server";
 
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
 import { auth } from "@/lib/auth";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 import { revalidatePath } from "next/cache";
 
 export async function updateAgentProfile(formData: {

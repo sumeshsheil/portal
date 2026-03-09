@@ -1,32 +1,33 @@
-import type { Metadata } from "next";
 import { format } from "date-fns";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { connectDB } from "@/lib/db/mongoose";
-import User, { type IUser } from "@/lib/db/models/User";
 import { verifyAdmin } from "@/lib/auth-check";
+import User, { type IUser } from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { AdminPayoutRequestList } from "@/components/admin/agents/AdminPayoutRequestList";
 import { AgentActions } from "@/components/admin/agents/AgentActions";
 import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VerificationRequestList } from "@/components/admin/agents/VerificationRequestList";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const metadata: Metadata = {
   title: "Travel Partner Management | Budget Travel Packages",
@@ -106,6 +107,7 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="payouts">Payout Requests</TabsTrigger>
           <TabsTrigger value="team">Team Members</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscribed Members</TabsTrigger>
         </TabsList>
@@ -211,6 +213,20 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                   </TableBody>
                 </Table>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payouts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payout Requests</CardTitle>
+              <CardDescription>
+                Review and process payout requests from travel partners.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdminPayoutRequestList />
             </CardContent>
           </Card>
         </TabsContent>

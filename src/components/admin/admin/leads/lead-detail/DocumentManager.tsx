@@ -1,26 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
-  FileText,
-  Plane,
-  Hotel,
-  FileCheck,
-  Receipt,
-  File,
-  Trash2,
-  Plus,
-  Loader2,
-  ExternalLink,
-} from "lucide-react";
-import {
-  addDocument,
-  removeDocument,
+    addDocument,
+    removeDocument
 } from "@/app/admin/(dashboard)/leads/[id]/document-actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+    ExternalLink, File, FileCheck, FileText, Hotel, Loader2, Plane, Plus, Receipt, Trash2
+} from "lucide-react";
+import { useState, useTransition } from "react";
 
 interface Document {
   name: string;

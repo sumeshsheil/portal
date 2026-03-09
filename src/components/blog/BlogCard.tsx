@@ -1,9 +1,9 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 import { Post } from "@/lib/wordpress/types";
-import { extractFeaturedImage, decodeHtmlEntities } from "@/lib/wordpress/utils";
+import { decodeHtmlEntities, extractFeaturedImage } from "@/lib/wordpress/utils";
 
 interface BlogCardProps {
   post: Post;

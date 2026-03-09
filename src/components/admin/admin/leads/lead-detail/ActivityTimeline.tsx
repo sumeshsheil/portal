@@ -1,13 +1,8 @@
+import type { LeadActivityItem } from "@/app/admin/(dashboard)/leads/[id]/activity-actions";
 import { format } from "date-fns";
 import {
-  Clock,
-  UserPlus,
-  UserMinus,
-  ArrowRight,
-  PlusCircle,
-  AlertTriangle,
+    AlertTriangle, ArrowRight, Clock, PlusCircle, UserMinus, UserPlus
 } from "lucide-react";
-import type { LeadActivityItem } from "@/app/admin/(dashboard)/leads/[id]/activity-actions";
 
 interface ActivityTimelineProps {
   activities: LeadActivityItem[];

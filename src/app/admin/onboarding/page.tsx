@@ -1,42 +1,36 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { upload } from "@imagekit/javascript";
-import Image from "next/image";
 import footerLogo from "@/../public/images/logo/footer-logo.svg";
-import {
-  Loader2,
-  ArrowRight,
-  ArrowLeft,
-  User,
-  FileText,
-  ScanFace,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { CameraCapture } from "@/components/admin/onboarding/CameraCapture";
 import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { upload } from "@imagekit/javascript";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { CameraCapture } from "@/components/admin/onboarding/CameraCapture";
+    ArrowLeft, ArrowRight, CheckCircle2,
+    Eye,
+    EyeOff, FileText, Loader2, ScanFace, User
+} from "lucide-react";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 // Regex constants
 const INDIA_PHONE_REGEX = /^\d{10}$/;

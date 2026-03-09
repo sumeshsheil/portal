@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
 import { Button } from "@/components/ui/button";
+import { FormControl } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { FormControl } from "@/components/ui/form";
-import { Plus, Minus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
+import React from "react";
 
 interface GuestCounterProps {
   value: string | number;

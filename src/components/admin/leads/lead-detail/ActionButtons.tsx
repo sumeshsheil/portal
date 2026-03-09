@@ -1,26 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Trophy, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Trophy } from "lucide-react";
 
 import {
-  updateLeadStage,
-  assignAgent,
-  refreshLeadTimer,
+    assignAgent,
+    refreshLeadTimer, updateLeadStage
 } from "@/app/admin/(dashboard)/leads/actions";
 
 interface Agent {

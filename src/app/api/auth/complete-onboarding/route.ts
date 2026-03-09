@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
-import { z } from "zod";
-import crypto from "crypto";
-import bcryptjs from "bcryptjs";
+import { connectDB } from "@/lib/db/mongoose";
 import { sendAgentVerificationNotification } from "@/lib/email";
+import bcryptjs from "bcryptjs";
+import crypto from "crypto";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const onboardingSchema = z.object({
   token: z.string().min(1, "Token is required"),

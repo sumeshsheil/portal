@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import Lottie from "lottie-react";
 import { motion } from "motion/react";
+import React, { useEffect, useState } from "react";
 
 interface LottieAnimationProps {
   animationData?: object;

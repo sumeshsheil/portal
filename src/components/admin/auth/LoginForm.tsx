@@ -1,35 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Loader2,
-  Eye,
-  EyeOff,
-  LogIn,
-  ArrowLeft,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import Image from "next/image";
 import logo from "@/../public/images/logo/footer-logo.svg";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    AlertCircle, ArrowLeft,
+    CheckCircle2, Eye,
+    EyeOff, Loader2, LogIn
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
 } from "@/components/ui/form";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import { OtpInput } from "@/components/ui/otp-input";
+import { toast } from "sonner";
 
 // Schemas
 const loginSchema = z.object({

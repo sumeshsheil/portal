@@ -1,29 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Eye, EyeOff, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Eye, EyeOff, X, ArrowLeft, RefreshCw } from "lucide-react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { OtpInput } from "@/components/ui/otp-input";
 import Image from "next/image";
 import { toast } from "sonner";
-import { OtpInput } from "@/components/ui/otp-input";
 
 // Schemas
 const loginSchema = z.object({

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X, Loader2 } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { updateAgentSubscription } from "../agents/actions";
 

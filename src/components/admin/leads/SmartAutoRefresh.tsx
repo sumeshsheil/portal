@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
 
 interface SmartAutoRefreshProps {
   interval?: number; // Frequency to check for refresh (in ms)

@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
 import { auth } from "@/lib/auth";
-import { z } from "zod";
+import Lead from "@/lib/db/models/Lead";
+import { connectDB } from "@/lib/db/mongoose";
 import { deleteFileFromImageKit } from "@/lib/imagekit";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 // ============ AUTH HELPER ============
 
@@ -26,6 +26,10 @@ export async function updateTripDetails(leadId: string, formData: FormData) {
 
   const lead = await Lead.findById(leadId);
   if (!lead) return { error: "Lead not found" };
+
+  if (lead.stage === "won") {
+    return { error: "Cannot edit a lead that has been marked as Won." };
+  }
 
   const inclusionsStr = (formData.get("inclusions") as string) || "";
   const exclusionsStr = (formData.get("exclusions") as string) || "";
@@ -72,6 +76,10 @@ export async function updateLeadBasicTripDetails(
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { error: "Cannot edit a lead that has been marked as Won." };
+    }
 
     const netAmountStr = formData.get("netAmount")?.toString();
     const tripProfitStr = formData.get("tripProfit")?.toString();
@@ -128,6 +136,10 @@ export async function updateLeadItineraryPdf(
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
 
+    if (lead.stage === "won") {
+      return { error: "Cannot edit a lead that has been marked as Won." };
+    }
+
     const oldUrl = lead.itineraryPdfUrl;
     lead.itineraryPdfUrl = itineraryPdfUrl;
     lead.lastActivityAt = new Date();
@@ -162,6 +174,10 @@ export async function updateLeadCostDetails(
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { error: "Cannot edit a lead that has been marked as Won." };
+    }
 
     lead.tripCost = tripCost;
     lead.tripProfit = tripProfit;

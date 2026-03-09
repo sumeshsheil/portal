@@ -1,8 +1,8 @@
+import { AgentProfileForm } from "@/components/admin/profile/AgentProfileForm";
+import { auth } from "@/lib/auth";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { getAgentProfile } from "./actions";
-import { AgentProfileForm } from "@/components/admin/profile/AgentProfileForm";
 
 export const metadata: Metadata = {
   title: "My Profile | Agent Dashboard",

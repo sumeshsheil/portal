@@ -1,9 +1,9 @@
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import bcryptjs from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
-import bcryptjs from "bcryptjs";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
 
 declare module "next-auth" {
   interface User {

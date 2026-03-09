@@ -2,22 +2,21 @@
 
 import { useActionState } from "react";
 
-import { useEffect } from "react";
-import { Lock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { changePassword } from "./actions";
 
 interface FormState {

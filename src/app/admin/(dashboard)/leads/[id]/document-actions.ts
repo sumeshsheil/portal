@@ -1,12 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
 import { auth } from "@/lib/auth";
-import { z } from "zod";
-import { deleteFileFromImageKit } from "@/lib/imagekit";
+import Lead from "@/lib/db/models/Lead";
+import { connectDB } from "@/lib/db/mongoose";
 import { sendTravelDocumentEmail } from "@/lib/email";
+import { deleteFileFromImageKit } from "@/lib/imagekit";
+import { revalidatePath } from "next/cache";
 
 // ============ AUTH HELPER ============
 
@@ -33,6 +32,10 @@ export async function updateLeadTravelDocumentsPdf(
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { error: "Cannot edit a lead that has been marked as Won." };
+    }
 
     const oldUrl = lead.travelDocumentsPdfUrl;
     lead.travelDocumentsPdfUrl = travelDocumentsPdfUrl;
@@ -84,6 +87,10 @@ export async function addDocument(leadId: string, formData: FormData) {
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
 
+    if (lead.stage === "won") {
+      return { error: "Cannot add documents to a confirmed trip." };
+    }
+
     const name = formData.get("name")?.toString();
     const url = formData.get("url")?.toString();
     const type = formData.get("type")?.toString();
@@ -117,6 +124,10 @@ export async function removeDocument(leadId: string, index: number) {
 
     const lead = await Lead.findById(leadId);
     if (!lead) return { error: "Lead not found" };
+
+    if (lead.stage === "won") {
+      return { error: "Cannot remove documents from a confirmed trip." };
+    }
 
     if (!lead.documents || !lead.documents[index]) {
       return { error: "Document not found" };

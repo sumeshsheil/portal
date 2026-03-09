@@ -1,59 +1,45 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Banknote, Calendar, Check, Edit2, FileText, Loader2, Mail, MapPin, Phone, ShieldAlert,
+    ShieldCheck, Smartphone, User, X
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Loader2,
-  Check,
-  ShieldAlert,
-  ShieldCheck,
-  FileText,
-  User,
-  Phone,
-  MapPin,
-  Calendar,
-  Mail,
-  Smartphone,
-  Banknote,
-} from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { z } from "zod";
 
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+    submitVerification, updateAgentProfile
+} from "@/app/admin/(dashboard)/profile/actions";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import ImageUpload from "@/components/ui/image-upload";
 import {
-  updateAgentProfile,
-  submitVerification,
-} from "@/app/admin/(dashboard)/profile/actions";
+    Form,
+    FormControl, FormDescription, FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from "@/components/ui/form";
+import ImageUpload from "@/components/ui/image-upload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
 const profileSchema = z.object({
@@ -84,6 +70,7 @@ interface AgentProfileFormProps {
 export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSubmittingDoc, setIsSubmittingDoc] = useState(false);
 
   const [aadharCards, setAadharCards] = useState<string[]>(
@@ -126,8 +113,9 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
         image: profileImage[0] || "",
       });
 
-      if (result.success) {
+        if (result.success) {
         toast.success(result.message);
+        setIsEditing(false);
         router.refresh();
       } else {
         toast.error(result.error || "Failed to update profile");
@@ -138,6 +126,29 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
       setIsPending(false);
     }
   }
+
+  const handleCancelEdit = () => {
+    form.reset({
+      name: initialData.name || "",
+      phone: initialData.phone || "",
+      age: initialData.age || 0,
+      gender: initialData.gender || "male",
+      address: initialData.address || "",
+      aadhaarNumber: initialData.aadhaarNumber || "",
+      panNumber: initialData.panNumber || "",
+      image: initialData.image || "",
+      bankDetails: {
+        accountHolderName: initialData.bankDetails?.accountHolderName || "",
+        accountNumber: initialData.bankDetails?.accountNumber || "",
+        bankName: initialData.bankDetails?.bankName || "",
+        ifscCode: initialData.bankDetails?.ifscCode || "",
+        branchName: initialData.bankDetails?.branchName || "",
+      },
+      upiId: initialData.upiId || "",
+    });
+    setProfileImage(initialData.image ? [initialData.image] : []);
+    setIsEditing(false);
+  };
 
   async function onDocSubmit() {
     if (!aadharCards.length || !panCards.length) {
@@ -229,7 +240,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                 maxFiles={1}
                 folder="/agent-profiles"
                 accept="image/*"
-                disabled={isPending}
+                disabled={isPending || !isEditing}
               />
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 Your professional agent profile photo.
@@ -240,11 +251,38 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
 
         {/* Right Column: Personal Info Form */}
         <Card className="col-span-2 border-slate-200 dark:border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-xl">Personal Information</CardTitle>
-            <CardDescription>
-              Your contact and identification details (Read-only).
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle className="text-xl">Personal Information</CardTitle>
+              <CardDescription>
+                Your contact and identification details.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing ? (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+              ) : (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -269,6 +307,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
+                              readOnly={!isEditing}
                             />
                           </div>
                         </FormControl>
@@ -305,6 +344,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
+                              readOnly={!isEditing}
                             />
                           </div>
                         </FormControl>
@@ -327,6 +367,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                               className="pl-9"
                               type="number"
                               {...field}
+                              readOnly={!isEditing}
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             />
                           </div>
@@ -348,7 +389,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger disabled={!isEditing}>
                               <SelectValue placeholder="Select gender" />
                             </SelectTrigger>
                           </FormControl>
@@ -376,6 +417,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
+                              readOnly={!isEditing}
                             />
                           </div>
                         </FormControl>
@@ -397,6 +439,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9"
                               {...field}
+                              readOnly={!isEditing}
                             />
                           </div>
                         </FormControl>
@@ -418,6 +461,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <Input
                               className="pl-9 uppercase"
                               {...field}
+                              readOnly={!isEditing}
                             />
                           </div>
                         </FormControl>
@@ -504,6 +548,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                                   placeholder="e.g. username@okhdfcbank" 
                                   className="h-12 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl font-medium focus-visible:ring-amber-500 transition-all shadow-xs"
                                   {...field} 
+                                  readOnly={!isEditing}
                                 />
                                 <div className="absolute right-3 top-3.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-100 dark:border-emerald-900">
                                   ACTIVE
@@ -533,7 +578,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <FormItem>
                               <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Account Holder Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="Name as per Passbook" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                                <Input placeholder="Name as per Passbook" className="bg-white dark:bg-slate-950 rounded-xl" {...field} readOnly={!isEditing} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -547,7 +592,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <FormItem>
                               <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Account Number</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter Account Number" className="font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                                <Input placeholder="Enter Account Number" className="font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} readOnly={!isEditing} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -561,7 +606,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <FormItem>
                               <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Bank Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g. HDFC Bank" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                                <Input placeholder="e.g. HDFC Bank" className="bg-white dark:bg-slate-950 rounded-xl" {...field} readOnly={!isEditing} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -575,7 +620,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <FormItem>
                               <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">IFSC Code</FormLabel>
                               <FormControl>
-                                <Input placeholder="HDFC0001234" className="uppercase font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                                <Input placeholder="HDFC0001234" className="uppercase font-mono bg-white dark:bg-slate-950 rounded-xl" {...field} readOnly={!isEditing} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -589,7 +634,7 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                             <FormItem>
                               <FormLabel className="text-xs font-bold text-slate-600 dark:text-slate-400">Branch Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g. Downtown Branch" className="bg-white dark:bg-slate-950 rounded-xl" {...field} />
+                                <Input placeholder="e.g. Downtown Branch" className="bg-white dark:bg-slate-950 rounded-xl" {...field} readOnly={!isEditing} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -600,20 +645,22 @@ export function AgentProfileForm({ initialData }: AgentProfileFormProps) {
                   </div>
                 </div>
 
-                <div className="flex justify-end md:col-span-2 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={isPending}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[150px]"
-                  >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Check className="h-4 w-4 mr-2" />
-                    )}
-                    Save Profile Changes
-                  </Button>
-                </div>
+                {isEditing && (
+                  <div className="flex justify-end md:col-span-2 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isPending}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[150px]"
+                    >
+                      {isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Check className="h-4 w-4 mr-2" />
+                      )}
+                      Save Profile Changes
+                    </Button>
+                  </div>
+                )}
               </form>
             </Form>
           </CardContent>

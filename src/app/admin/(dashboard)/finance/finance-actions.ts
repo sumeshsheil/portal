@@ -1,26 +1,34 @@
 "use server";
 
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
-import User from "@/lib/db/models/User";
 import { verifySession } from "@/lib/auth-check";
+import Lead from "@/lib/db/models/Lead";
+import PayoutRequest from "@/lib/db/models/PayoutRequest";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { endOfDay, endOfMonth, startOfDay, startOfMonth, subMonths } from "date-fns";
 import mongoose from "mongoose";
-import { startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from "date-fns";
 
 export interface FinanceStats {
-  totalSales: number;        // Count of Won leads
-  totalNet: number;          // netAmount of Won leads
-  totalEarning: number;     // tripProfit of Won leads
-  totalPaid: number;        // Sum of all verified payments
+  wonCount: number;         // Count of Won leads
+  totalNet: number;          // Realized cost based on verified payments
+  totalEarning: number;     // Realized profit based on verified payments
+  totalRevenue: number;     // Sum of all verified payments
   monthlyGrowth?: number;    // Comparison with previous period
+}
+
+export interface PayoutBalance {
+  totalEarnings: number;     // All-time earnings from Won/Dropped leads
+  pendingPayouts: number;    // Total of "processing" requests
+  paidAmount: number;        // Total of "Paid" requests
+  availableToPayout: number; // totalEarnings - pendingPayouts - paidAmount
 }
 
 export interface FinanceFilters {
   tripType: "all" | "domestic" | "international";
   period: "current_month" | "last_month" | "last_3_months" | "last_6_months" | "year" | "last_year" | "all_time" | "custom";
   agentId?: string;
-  dateFrom?: string; // ISO date string for custom range
-  dateTo?: string;   // ISO date string for custom range
+  dateFrom?: string; 
+  dateTo?: string;   
 }
 
 export async function getFinanceStats(filters: FinanceFilters) {
@@ -86,47 +94,119 @@ export async function getFinanceStats(filters: FinanceFilters) {
       }
     }
 
-    // 4. Aggregation for Won Leads (Sales, Net, Profit)
-    const wonLeads = await Lead.find({ ...query, stage: "won" })
-      .select("tripCost netAmount tripProfit")
+    // 4. Aggregation for metrics
+    // We need all leads matching the query to calculate realized numbers from payments
+    const targetLeads = await Lead.find(query)
+      .select("stage tripCost netAmount tripProfit bookingPayments")
       .lean();
+    
+    let wonCount = 0;
+    let totalNet = 0;
+    let totalEarning = 0;
+    let totalRevenue = 0;
 
-    const stats = wonLeads.reduce(
-      (acc, lead: any) => {
-        acc.totalSales += lead.tripCost || 0;
-        acc.totalNet += lead.netAmount || 0;
-        acc.totalEarning += lead.tripProfit || 0;
-        return acc;
-      },
-      { totalSales: 0, totalNet: 0, totalEarning: 0 }
-    );
+    targetLeads.forEach((lead: any) => {
+      if (lead.stage === "won") wonCount++;
 
-    // 5. Aggregation for Payments (Total Paid)
-    // For payments, we need to gather all verified payments from leads matching the filter (not just won leads)
-    const leadsWithPayments = await Lead.find(query)
-      .select("bookingPayments")
-      .lean();
+      // Calculate verified payments for this lead
+      const verifiedSum = (lead.bookingPayments || [])
+        .filter((p: any) => p.status === "verified")
+        .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
-    let totalPaid = 0;
-    leadsWithPayments.forEach((lead: any) => {
-      if (lead.bookingPayments) {
-        lead.bookingPayments.forEach((payment: any) => {
-          if (payment.status === "verified") {
-            totalPaid += payment.amount || 0;
-          }
-        });
+      if (verifiedSum > 0) {
+        totalRevenue += verifiedSum;
+        
+        const tripCost = lead.tripCost || 0;
+        const netAmount = lead.netAmount || 0;
+        const tripProfit = lead.tripProfit || 0;
+
+        // Proportionally distribute verified payments between cost and profit
+        // This ensures: Actual Cost + Total Profit = Total Revenue (Verified Payments)
+        if (tripCost > 0) {
+          const ratio = verifiedSum / tripCost;
+          totalNet += netAmount * ratio;
+          totalEarning += tripProfit * ratio;
+        }
       }
     });
 
     return {
       success: true,
       stats: {
-        ...stats,
-        totalPaid,
+        wonCount,
+        totalNet: Math.round(totalNet),
+        totalEarning: Math.round(totalEarning),
+        totalRevenue: Math.round(totalRevenue),
       },
     };
   } catch (error: any) {
     console.error("Finance Stats Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getAgentPayoutBalance(agentId?: string) {
+  try {
+    const session = await verifySession();
+    await connectDB();
+
+    const targetAgentId = session.role === "admin" && agentId 
+      ? agentId 
+      : session.id;
+
+    if (!targetAgentId) return { success: false, error: "Agent ID required" };
+
+    // 1. Calculate Total Earnings from all Won/Dropped leads (All Time)
+    const leads = await Lead.find({
+      agentId: new mongoose.Types.ObjectId(targetAgentId),
+      stage: { $in: ["won", "dropped"] }
+    }).select("tripProfit tripCost netAmount bookingPayments").lean();
+
+    let totalEarnings = 0;
+    leads.forEach((lead: any) => {
+      const verifiedSum = (lead.bookingPayments || [])
+        .filter((p: any) => p.status === "verified")
+        .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+      if (verifiedSum > 0) {
+        const tripCost = lead.tripCost || 0;
+        const tripProfit = lead.tripProfit || 0;
+        const netAmount = lead.netAmount || 0;
+        if (tripCost > 0) {
+          const ratio = verifiedSum / tripCost;
+          // Payout is calculated on both Net (Actual Cost) + Profit
+          totalEarnings += (netAmount + tripProfit) * ratio;
+        }
+      }
+    });
+
+
+    // 2. Fetch all Payout Requests
+    const payoutRequests = await PayoutRequest.find({
+      agentId: new mongoose.Types.ObjectId(targetAgentId)
+    }).lean();
+
+    let pendingPayouts = 0;
+    let paidAmount = 0;
+
+    payoutRequests.forEach((req: any) => {
+      if (req.status === "processing") {
+        pendingPayouts += req.amount;
+      } else if (req.status === "Paid") {
+        paidAmount += req.amount;
+      }
+    });
+
+    const balance: PayoutBalance = {
+      totalEarnings: Math.round(totalEarnings),
+      pendingPayouts: Math.round(pendingPayouts),
+      paidAmount: Math.round(paidAmount),
+      availableToPayout: Math.round(totalEarnings - pendingPayouts - paidAmount),
+    };
+
+    return { success: true, balance };
+  } catch (error: any) {
+    console.error("Payout Balance Error:", error);
     return { success: false, error: error.message };
   }
 }

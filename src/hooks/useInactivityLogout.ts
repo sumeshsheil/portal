@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
 import { signOut } from "next-auth/react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes

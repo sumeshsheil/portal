@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Check, Copy, FileText } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface CopyableBadgeProps {
   label: string;

@@ -1,21 +1,18 @@
-import type { Metadata } from "next";
-import { Users, TrendingUp, Banknote, Activity } from "lucide-react";
-import Link from "next/link";
 import { format } from "date-fns";
+import { Activity, Banknote, TrendingUp, Users } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CreateLeadDialog } from "@/components/admin/leads/CreateLeadDialog";
 import { CreateCustomerDialog } from "@/components/admin/customers/CreateCustomerDialog";
-import { UserPlus } from "lucide-react";
+import { CreateLeadDialog } from "@/components/admin/leads/CreateLeadDialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent, CardDescription, CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 
 import { getDashboardStats } from "./actions";
 
@@ -106,46 +103,46 @@ export default async function DashboardPage() {
           <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Inquiries</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalLeads}</div>
-                <p className="text-xs text-muted-foreground">
-                  Across all stages
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeAgents}</div>
-                <p className="text-xs text-muted-foreground">
-                  Currently handling inquiries
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.conversionRate}%</div>
+                <div className="text-2xl font-bold">{stats.wonLeadsCount}</div>
                 <p className="text-xs text-muted-foreground">
-                  Inquiries converted to won
+                  Successfully sold leads
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                <CardTitle className="text-sm font-medium">Net</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalCost.toLocaleString("en-IN")}</div>
+                <p className="text-xs text-muted-foreground">
+                  Realized from verified payments
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalProfit.toLocaleString("en-IN")}</div>
+                <p className="text-xs text-muted-foreground">
+                  Realized from verified payments
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 <Banknote className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -153,7 +150,7 @@ export default async function DashboardPage() {
                   ₹{stats.totalRevenue.toLocaleString("en-IN")}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Total trip cost of won inquiries
+                  Verified client payments
                 </p>
               </CardContent>
             </Card>

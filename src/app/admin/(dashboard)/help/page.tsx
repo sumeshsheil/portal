@@ -1,12 +1,12 @@
-import Image from "next/image";
-import { Mail, HelpCircle } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
+import { HelpCircle, Mail } from "lucide-react";
+import Image from "next/image";
 
 export default function HelpPage() {
   return (

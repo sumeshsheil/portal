@@ -1,30 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
 import logo from "@/../public/images/logo/logo.svg";
 import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  Settings,
-  Plane,
+    FileText, LayoutDashboard, Plane, Settings, Users
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu, SidebarMenuButton, SidebarMenuItem
+} from "@/components/ui/sidebar";
 import { motion } from "motion/react";
 
 export function AdminAppSidebar() {

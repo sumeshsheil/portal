@@ -1,10 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
 import { auth } from "@/lib/auth";
+import Lead from "@/lib/db/models/Lead";
+import { connectDB } from "@/lib/db/mongoose";
 import { sendPaymentStatusNotification } from "@/lib/email";
+import { revalidatePath } from "next/cache";
 
 export async function verifyPayment(leadId: string, paymentId: string) {
   try {
@@ -16,6 +16,10 @@ export async function verifyPayment(leadId: string, paymentId: string) {
     await connectDB();
     const lead = await Lead.findById(leadId);
     if (!lead) throw new Error("Lead not found");
+
+    if (lead.stage === "won") {
+      throw new Error("Cannot verify payments for a trip that is already Won.");
+    }
 
     const payment = (lead.bookingPayments as any).id(paymentId);
     if (!payment) throw new Error("Payment record not found");
@@ -74,6 +78,10 @@ export async function rejectPayment(leadId: string, paymentId: string, reason: s
     await connectDB();
     const lead = await Lead.findById(leadId);
     if (!lead) throw new Error("Lead not found");
+
+    if (lead.stage === "won") {
+      throw new Error("Cannot reject payments for a trip that is already Won.");
+    }
 
     const payment = (lead.bookingPayments as any).id(paymentId);
     if (!payment) throw new Error("Payment record not found");

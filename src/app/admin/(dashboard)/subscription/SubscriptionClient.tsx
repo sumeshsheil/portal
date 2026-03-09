@@ -1,43 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
-import UpcomingPaymentsIcon from "@/components/ui/icons/upcoming-payments-icon";
-import { 
-  Check, 
-  Download, 
-  Copy, 
-  CreditCard, 
-  Zap, 
-  Clock, 
-  AlertCircle,
-  ShieldCheck,
-  Phone,
-  Star,
-} from "lucide-react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent
+} from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription, DialogTitle
+} from "@/components/ui/dialog";
+import UpcomingPaymentsIcon from "@/components/ui/icons/upcoming-payments-icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
+    AlertCircle, Check, Clock, Copy,
+    CreditCard, Download, Loader2 as LoaderIcon, Phone, ShieldCheck, Star, Zap
+} from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Loader2 as LoaderIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { submitSubscriptionRequest } from "./actions";
 
 interface SubscriptionClientProps {

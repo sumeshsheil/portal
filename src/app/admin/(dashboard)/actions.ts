@@ -1,22 +1,24 @@
 "use server";
 
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
-import User from "@/lib/db/models/User";
-import Contact from "@/lib/db/models/Contact";
-import Notification from "@/lib/db/models/Notification";
 import { auth } from "@/lib/auth";
+import Contact from "@/lib/db/models/Contact";
+import Lead from "@/lib/db/models/Lead";
+import Notification from "@/lib/db/models/Notification";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { sendSetPasswordEmail, sendWelcomeEmail } from "@/lib/email";
+import bcryptjs from "bcryptjs";
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import crypto from "crypto";
-import bcryptjs from "bcryptjs";
-import { sendWelcomeEmail, sendSetPasswordEmail } from "@/lib/email";
 
 interface DashboardStats {
   totalLeads: number;
   activeAgents: number;
   conversionRate: string;
-  totalRevenue: number;
+  totalRevenue: number;     // Verified payments
+  totalCost: number;        // Realized cost
+  totalProfit: number;      // Realized profit
   recentLeads: Array<{
     _id: string;
     traveler: string;
@@ -59,17 +61,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     ? { stage: "won" as const, agentId: session.user.id }
     : { stage: "won" as const };
 
-  const [totalLeads, activeAgents, wonLeadsCount, totalRevenueResult, recentLeads, createdContacts] =
+  // 1. Initial counts and baseline data
+  const [totalLeads, activeAgents, wonLeadsCount, recentLeads, createdContacts] =
     await Promise.all([
       Lead.countDocuments(leadFilter),
       isAgent
         ? Promise.resolve(0)
         : User.countDocuments({ role: "agent", status: "active" }),
       Lead.countDocuments(wonFilter),
-      Lead.aggregate([
-        { $match: wonFilter },
-        { $group: { _id: null, total: { $sum: "$tripCost" } } },
-      ]),
       Lead.find(leadFilter)
         .sort({ createdAt: -1 })
         .limit(5)
@@ -78,7 +77,32 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       isAgent ? Contact.countDocuments({ agentId: session.user.id }) : Contact.countDocuments(),
     ]);
 
-  const totalRevenue = totalRevenueResult[0]?.total || 0;
+  // 2. Realized metrics from all leads the user can see
+  const allLeads = await Lead.find(leadFilter)
+    .select("tripCost netAmount tripProfit bookingPayments")
+    .lean();
+
+  let totalRevenue = 0;
+  let totalCost = 0;
+  let totalProfit = 0;
+
+  allLeads.forEach((lead: any) => {
+    const verifiedSum = (lead.bookingPayments || [])
+      .filter((p: any) => p.status === "verified")
+      .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+    
+    if (verifiedSum > 0) {
+      totalRevenue += verifiedSum;
+      const tripCost = lead.tripCost || 0;
+      // Proportionally distribute verified payments between cost and profit
+      if (tripCost > 0) {
+        const ratio = verifiedSum / tripCost;
+        totalCost += (lead.netAmount || 0) * ratio;
+        totalProfit += (lead.tripProfit || 0) * ratio;
+      }
+    }
+  });
+
   const conversionRate =
     totalLeads > 0 ? ((wonLeadsCount / totalLeads) * 100).toFixed(1) : "0";
 
@@ -105,7 +129,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalLeads,
     activeAgents,
     conversionRate,
-    totalRevenue,
+    totalRevenue: Math.round(totalRevenue),
+    totalCost: Math.round(totalCost),
+    totalProfit: Math.round(totalProfit),
     recentLeads: serializedLeads,
     isAgent,
     createdContacts,

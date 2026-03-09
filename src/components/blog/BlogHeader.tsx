@@ -1,10 +1,10 @@
 "use client";
 
-import { Search, Home } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Home, Search } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export default function BlogHeader() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,6 +1,5 @@
 import Notification from "@/lib/db/models/Notification";
 import { connectDB } from "@/lib/db/mongoose";
-import { revalidatePath } from "next/cache";
 
 interface CreateNotificationParams {
   userId: string; // Recipient

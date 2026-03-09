@@ -1,10 +1,10 @@
 "use server";
 
-import { z } from "zod";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
 import { auth } from "@/lib/auth";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),

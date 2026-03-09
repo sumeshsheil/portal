@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/db/mongoose";
 import User, { IMember } from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 // Schema for a single member

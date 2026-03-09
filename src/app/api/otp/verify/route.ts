@@ -1,14 +1,10 @@
-import { NextResponse } from "next/server";
-import {
-  isTestVerification,
-  getTestVerifyResponse,
-  getAuthToken,
-  MC_ERROR_MESSAGES,
-  getMCErrorStatus,
-} from "@/lib/sms";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import {
+    getAuthToken, getMCErrorStatus, getTestVerifyResponse, isTestVerification, MC_ERROR_MESSAGES
+} from "@/lib/sms";
+import { NextResponse } from "next/server";
 
 const MC_BASE_URL = "https://cpaas.messagecentral.com";
 const MC_CUSTOMER_ID = process.env.MC_CUSTOMER_ID!;

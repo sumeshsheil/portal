@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 interface OtpInputProps {
   value: string;

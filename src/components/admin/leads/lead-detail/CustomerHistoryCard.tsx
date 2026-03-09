@@ -1,18 +1,13 @@
 "use client";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+    Card,
+    CardContent, CardDescription, CardHeader,
+    CardTitle
 } from "@/components/ui/card";
 import {
-  History,
-  TrendingUp,
-  XCircle,
-  CheckCircle2,
-  IndianRupee,
+    CheckCircle2, History, IndianRupee, TrendingUp,
+    XCircle
 } from "lucide-react";
 
 interface CustomerHistory {

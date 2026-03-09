@@ -1,10 +1,9 @@
+import { auth } from "@/lib/auth";
+import Lead from "@/lib/db/models/Lead";
+import { connectDB } from "@/lib/db/mongoose";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { format } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { connectDB } from "@/lib/db/mongoose";
-import Lead from "@/lib/db/models/Lead";
-import { auth } from "@/lib/auth";
 
 interface LeadListItem {
   _id: string;
@@ -36,17 +35,16 @@ interface LeadQuery {
   _id?: any;
 }
 
-import { Badge } from "@/components/ui/badge";
+import { CreateLeadDialog } from "@/components/admin/leads/CreateLeadDialog";
+import { KanbanBoard } from "@/components/admin/leads/kanban/KanbanBoard";
+import { LeadFilters } from "@/components/admin/leads/LeadFilters";
+import { LeadSearch } from "@/components/admin/leads/LeadSearch";
+import { LeadTable } from "@/components/admin/leads/LeadTable";
+import { LeadTypeTabs } from "@/components/admin/leads/LeadTypeTabs";
+import SmartAutoRefresh from "@/components/admin/leads/SmartAutoRefresh";
+import { ViewToggle } from "@/components/admin/leads/ViewToggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { LeadSearch } from "@/components/admin/leads/LeadSearch";
-import { LeadFilters } from "@/components/admin/leads/LeadFilters";
-import { KanbanBoard } from "@/components/admin/leads/kanban/KanbanBoard";
-import { ViewToggle } from "@/components/admin/leads/ViewToggle";
-import SmartAutoRefresh from "@/components/admin/leads/SmartAutoRefresh";
-import { CreateLeadDialog } from "@/components/admin/leads/CreateLeadDialog";
-import { LeadTypeTabs } from "@/components/admin/leads/LeadTypeTabs";
-import { LeadTable } from "@/components/admin/leads/LeadTable";
 import User from "@/lib/db/models/User";
 
 export const metadata: Metadata = {

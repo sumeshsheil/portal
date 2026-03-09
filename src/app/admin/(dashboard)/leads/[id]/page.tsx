@@ -1,42 +1,38 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import {
-  ArrowLeft,
-  MapPin,
-  Mail,
-  Phone,
-  Users,
-  AlertTriangle,
+    AlertTriangle, ArrowLeft, Mail, MapPin, Phone,
+    Users
 } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { connectDB } from "@/lib/db/mongoose";
+import { auth } from "@/lib/auth";
 import Lead from "@/lib/db/models/Lead";
 import User from "@/lib/db/models/User";
-import { auth } from "@/lib/auth";
+import { connectDB } from "@/lib/db/mongoose";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { ActionButtons } from "@/components/admin/leads/lead-detail/ActionButtons";
 import { ActivityTimeline } from "@/components/admin/leads/lead-detail/ActivityTimeline";
+import { AgentIdentityCard } from "@/components/admin/leads/lead-detail/AgentIdentityCard";
+import { CopyableBadge } from "@/components/admin/leads/lead-detail/CopyableBadge";
+import { CustomerHistoryCard } from "@/components/admin/leads/lead-detail/CustomerHistoryCard";
 import { DocumentManager } from "@/components/admin/leads/lead-detail/DocumentManager";
 import { ItineraryManager } from "@/components/admin/leads/lead-detail/ItineraryManager";
-import { TripInfoManager } from "@/components/admin/leads/lead-detail/TripInfoManager";
-import { PaymentManager } from "@/components/admin/leads/lead-detail/PaymentManager";
-import { AgentIdentityCard } from "@/components/admin/leads/lead-detail/AgentIdentityCard";
-import { CustomerHistoryCard } from "@/components/admin/leads/lead-detail/CustomerHistoryCard";
 import { LeadCommentsCard } from "@/components/admin/leads/lead-detail/LeadCommentsCard";
-import { CopyableBadge } from "@/components/admin/leads/lead-detail/CopyableBadge";
-import { cn } from "@/lib/utils";
+import { PaymentManager } from "@/components/admin/leads/lead-detail/PaymentManager";
+import { TripInfoManager } from "@/components/admin/leads/lead-detail/TripInfoManager";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { getLeadActivities } from "./activity-actions";
 
 interface PopulatedAgent {
@@ -228,6 +224,7 @@ export default async function LeadDetailPage({
             tripCost={lead.tripCost}
             tripProfit={lead.tripProfit}
             specialRequests={lead.specialRequests}
+            isWon={lead.stage === "won"}
           />
 
           {/* Travelers Card */}
@@ -473,6 +470,7 @@ export default async function LeadDetailPage({
             paymentStatus={lead.paymentStatus}
             customerEmail={lead.travelers?.[0]?.email}
             isAdmin={session.user.role === "admin"}
+            isWon={lead.stage === "won"}
           />
 
           {/* Documents Manager */}
@@ -503,8 +501,9 @@ export default async function LeadDetailPage({
             leadId={leadId}
             comments={JSON.parse(JSON.stringify(lead.comments || []))}
             disabled={
-              !(session.user.role === "admin") &&
-              lead.agentId?._id.toString() !== session.user.id
+              lead.stage === "won" ||
+              (!(session.user.role === "admin") &&
+              lead.agentId?._id.toString() !== session.user.id)
             }
           />
 

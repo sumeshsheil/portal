@@ -1,21 +1,19 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
+import { auth } from "@/lib/auth";
 import Lead from "@/lib/db/models/Lead";
 import User from "@/lib/db/models/User";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { logLeadActivity } from "@/lib/lead-activity";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import crypto from "crypto";
-import bcryptjs from "bcryptjs";
-import { auth } from "@/lib/auth";
+import { connectDB } from "@/lib/db/mongoose";
 import {
-  sendLeadConfirmationEmail,
-  sendLeadNotificationEmail,
-  sendWelcomeEmail,
-  sendSetPasswordEmail,
+    sendLeadConfirmationEmail,
+    sendLeadNotificationEmail, sendSetPasswordEmail, sendWelcomeEmail
 } from "@/lib/email";
+import { logLeadActivity } from "@/lib/lead-activity";
+import { checkRateLimit } from "@/lib/rate-limit";
+import bcryptjs from "bcryptjs";
+import crypto from "crypto";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 // Validation Schema matching the form
 const leadSchema = z.object({

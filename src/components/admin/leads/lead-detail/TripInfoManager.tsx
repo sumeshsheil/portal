@@ -1,37 +1,30 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { format } from "date-fns";
-import {
-  Calendar as CalendarIcon,
-  Loader2,
-  Plane,
-  MapPin,
-  Users,
-  Banknote,
-  Clock,
-  MessageSquare,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { updateLeadBasicTripDetails } from "@/app/admin/(dashboard)/leads/[id]/itinerary-actions";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { updateLeadBasicTripDetails } from "@/app/admin/(dashboard)/leads/[id]/itinerary-actions";
+import { format } from "date-fns";
+import {
+    Banknote, Calendar as CalendarIcon, Clock, Loader2, MapPin, MessageSquare, Plane, Users
+} from "lucide-react";
+import { useState, useTransition } from "react";
 
 interface TripInfoManagerProps {
   leadId: string;
@@ -46,6 +39,7 @@ interface TripInfoManagerProps {
   tripCost?: number;
   tripProfit?: number;
   specialRequests?: string;
+  isWon?: boolean;
 }
 
 export function TripInfoManager({
@@ -61,6 +55,7 @@ export function TripInfoManager({
   tripCost,
   tripProfit,
   specialRequests,
+  isWon,
 }: TripInfoManagerProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -102,13 +97,15 @@ export function TripInfoManager({
           <Plane className="h-5 w-5 text-emerald-600" />
           Trip Overview
         </CardTitle>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {isEditing ? "Cancel" : "Edit Trip"}
-        </Button>
+        {!isWon && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? "Cancel" : "Edit Trip"}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isEditing ? (

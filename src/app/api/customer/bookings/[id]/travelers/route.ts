@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/db/mongoose";
 import Lead from "@/lib/db/models/Lead";
-import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const addTravelerSchema = z.object({

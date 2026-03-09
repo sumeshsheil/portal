@@ -1,24 +1,13 @@
 "use client";
 
-import React from "react";
 import { format } from "date-fns";
 import {
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  ShieldCheck,
-  FileText,
-  MapPin,
-  ExternalLink,
-  CreditCard,
-  Banknote,
-  Smartphone,
+    Banknote, CreditCard, ExternalLink, FileText, Mail, MapPin, Phone, ShieldCheck, Smartphone, User
 } from "lucide-react";
 
-import { DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface Agent {

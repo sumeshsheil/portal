@@ -1,8 +1,8 @@
 "use server";
 
-import { connectDB } from "@/lib/db/mongoose";
-import LeadActivity from "@/lib/db/models/LeadActivity";
 import { auth } from "@/lib/auth";
+import LeadActivity from "@/lib/db/models/LeadActivity";
+import { connectDB } from "@/lib/db/mongoose";
 import mongoose from "mongoose";
 
 export interface LeadActivityItem {

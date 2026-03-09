@@ -1,6 +1,6 @@
+import { StoreProvider } from "@/lib/redux/StoreProvider";
 import { Metadata, Viewport } from "next";
 import { Inter, Open_Sans } from "next/font/google";
-import { StoreProvider } from "@/lib/redux/StoreProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -13,11 +13,11 @@ const openSans = Open_Sans({
   variable: "--font-open-sans",
 });
 
-import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
-import SessionProvider from "@/components/providers/SessionProvider";
+
 import { AppThemeProvider } from "@/components/providers/AppThemeProvider";
+import SessionProvider from "@/components/providers/SessionProvider";
+import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { Toaster } from "@/components/ui/sonner";
-import SystemHealthCheck from "@/components/layout/SystemHealthCheck";
 
 export const viewport: Viewport = {
   themeColor: "#01FF70",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/logo/logo.svg", // Use logo or a specific OG image if available
+        url: "/images/logo/logo.svg", 
         width: 800,
         height: 600,
         alt: "Budget Travel Packages Logo",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     title: "Budget Travel Packages",
     description:
       "Affordable, customized domestic and international travel packages from India.",
-    images: ["/images/logo/logo.svg"], // Same here
+    images: ["/images/logo/logo.svg"],
   },
   alternates: {
     canonical: "/",
@@ -120,7 +120,7 @@ export default function RootLayout({
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: 22.5726, // Approx coordinates for Sector V
+      latitude: 22.5726, 
       longitude: 88.4374,
     },
     openingHoursSpecification: {
@@ -137,9 +137,9 @@ export default function RootLayout({
       closes: "19:00",
     },
     sameAs: [
-      "https://facebook.com",
-      "https://instagram.com",
-      "https://youtube.com",
+      "https://www.facebook.com/budgettravelpackages",
+      "https://www.instagram.com/budgettravelpackages.in",
+      "https://www.youtube.com/@budgettravelpackages",
     ],
     priceRange: "₹500 - ₹500000",
   };
@@ -155,7 +155,6 @@ export default function RootLayout({
           <StoreProvider>
             <SessionProvider>
               <SmoothScrollProvider>
-                <SystemHealthCheck />
                 {children}
                 <Toaster richColors position="top-right" />
               </SmoothScrollProvider>

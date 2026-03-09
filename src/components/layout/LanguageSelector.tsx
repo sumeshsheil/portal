@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Globe, ChevronDown, Check } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { Check, ChevronDown, Globe } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 
 interface Language {
   code: string;

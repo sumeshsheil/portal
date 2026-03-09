@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plane, ShieldAlert } from "lucide-react";
-import { PlanTripModal } from "./PlanTripModal";
 import Link from "next/link";
+import React, { useState } from "react";
+import { PlanTripModal } from "./PlanTripModal";
 
 interface PlanTripButtonProps {
   user: {

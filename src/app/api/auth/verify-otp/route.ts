@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const verifyOtpSchema = z.object({

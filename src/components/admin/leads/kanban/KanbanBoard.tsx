@@ -1,23 +1,16 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { differenceInMinutes } from "date-fns";
-import {
-  DndContext,
-  DragOverlay,
-  useSensor,
-  useSensors,
-  MouseSensor,
-  TouchSensor,
-  DragEndEvent,
-  DragStartEvent,
-  pointerWithin,
-} from "@dnd-kit/core";
-import { KanbanLead, LeadStage, LEAD_STAGES } from "./types";
-import { KanbanColumn } from "./KanbanColumn";
-import { KanbanCard } from "./KanbanCard";
-import { toast } from "sonner";
 import { updateLeadStage } from "@/app/admin/(dashboard)/leads/actions";
+import {
+    DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, pointerWithin, TouchSensor, useSensor,
+    useSensors
+} from "@dnd-kit/core";
+import { differenceInMinutes } from "date-fns";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { KanbanCard } from "./KanbanCard";
+import { KanbanColumn } from "./KanbanColumn";
+import { KanbanLead, LeadStage, LEAD_STAGES } from "./types";
 
 interface KanbanBoardProps {
   initialLeads: KanbanLead[];

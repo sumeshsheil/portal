@@ -1,11 +1,11 @@
-import { Metadata } from "next";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
-import { auth } from "@/lib/auth";
-import { ProfileForm } from "./profile-form";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 import { KeyRound, Mail } from "lucide-react";
+import { Metadata } from "next";
+import Link from "next/link";
+import { ProfileForm } from "./profile-form";
 
 export const metadata: Metadata = {
   title: "Settings | Budget Travel Packages",

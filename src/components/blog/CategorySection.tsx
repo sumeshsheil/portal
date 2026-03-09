@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import BlogCard from "./BlogCard";
 import { Post } from "@/lib/wordpress/types";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import BlogCard from "./BlogCard";
 
 interface CategorySectionProps {
   title: string;

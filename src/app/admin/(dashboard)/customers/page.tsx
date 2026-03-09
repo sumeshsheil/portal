@@ -1,34 +1,34 @@
-import type { Metadata } from "next";
 import { format } from "date-fns";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { connectDB } from "@/lib/db/mongoose";
-import User, { type IUser } from "@/lib/db/models/User";
 import { verifyAdmin } from "@/lib/auth-check";
+import User, { type IUser } from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput"; // Reusing search input
+import { CreateCustomerDialog } from "@/components/admin/customers/CreateCustomerDialog";
+import { ExportCustomersButton } from "@/components/admin/customers/ExportCustomersButton";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
-import { AgentSearchInput } from "@/components/admin/agents/AgentSearchInput"; // Reusing search input
-import { ExportCustomersButton } from "@/components/admin/customers/ExportCustomersButton";
-import { CreateCustomerDialog } from "@/components/admin/customers/CreateCustomerDialog";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from "@/components/ui/table";
 
 export const metadata: Metadata = {
-  title: "Leads | Budget Travel Packages",
-  description: "View and manage registered leads",
+  title: "Platform Users | Budget Travel Packages",
+  description: "View and manage registered customers",
 };
 
 interface CustomersPageProps {
@@ -88,9 +88,9 @@ export default async function CustomersPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Leads</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Platform Users</h2>
           <p className="text-muted-foreground">
-            A list of all users registered as leads.
+            A list of all users registered on the platform.
           </p>
         </div>
         <div className="flex items-center gap-2">

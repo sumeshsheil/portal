@@ -1,4 +1,3 @@
-import React from "react";
 
 const FacebookIcon = ({ size = 40, color = "#1877F2", ...props }) => {
   return (

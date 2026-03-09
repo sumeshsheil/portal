@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
 import User from "@/lib/db/models/User";
-import crypto from "crypto";
-import { z } from "zod";
+import { connectDB } from "@/lib/db/mongoose";
 import { sendOtpEmail } from "@/lib/email";
+import crypto from "crypto";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),

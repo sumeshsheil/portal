@@ -1,19 +1,17 @@
 "use server";
 
+import { verifyAdmin } from "@/lib/auth-check";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import {
+    sendAgentApprovalEmail, sendAgentPromotionEmail,
+    sendAgentRejectionEmail, sendAgentWelcomeEmail
+} from "@/lib/email";
+import { generatePassword } from "@/lib/password";
+import bcryptjs from "bcryptjs";
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import bcryptjs from "bcryptjs";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/lib/db/models/User";
-import { verifyAdmin } from "@/lib/auth-check";
-import { generatePassword } from "@/lib/password";
-import crypto from "crypto";
-import {
-  sendAgentWelcomeEmail,
-  sendAgentPromotionEmail,
-  sendAgentRejectionEmail,
-  sendAgentApprovalEmail,
-} from "@/lib/email";
 
 const createAgentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

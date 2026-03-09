@@ -1,10 +1,7 @@
-import { NextResponse } from "next/server";
 import {
-  isTestPhone,
-  getTestSendResponse,
-  getAuthToken,
-  checkPhoneRateLimit,
+    checkPhoneRateLimit, getAuthToken, getTestSendResponse, isTestPhone
 } from "@/lib/sms";
+import { NextResponse } from "next/server";
 
 const MC_BASE_URL = "https://cpaas.messagecentral.com";
 const MC_CUSTOMER_ID = process.env.MC_CUSTOMER_ID!;

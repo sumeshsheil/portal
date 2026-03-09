@@ -1,15 +1,14 @@
-import { Metadata } from "next";
-import { connectDB } from "@/lib/db/mongoose";
-import Contact from "@/lib/db/models/Contact";
-import User from "@/lib/db/models/User";
-import { auth } from "@/lib/auth";
 import { ContactsTable } from "@/components/admin/contacts/ContactsTable";
 import { CreateContactDialog } from "@/components/admin/contacts/CreateContactDialog";
-import { CreateCustomerAccountDialog } from "@/components/admin/contacts/CreateCustomerAccountDialog";
+import { auth } from "@/lib/auth";
+import Contact from "@/lib/db/models/Contact";
+import User from "@/lib/db/models/User";
+import { connectDB } from "@/lib/db/mongoose";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Leads | Budget Travel Packages",
-  description: "Manage your personal leads",
+  description: "Manage your personal lead list",
 };
 
 const PLAN_LIMITS: Record<string, number> = {
@@ -68,13 +67,12 @@ export default async function ContactsPage() {
               <span>Manage all system contacts. ({leadCount} total)</span>
             ) : (
               <span>
-                Manage your personal leads. You are on the <span className="font-semibold capitalize">{plan}</span> plan. ({leadCount}/{limit === Infinity ? "Unlimited" : limit})
+                Manage your personal lead list. You are on the <span className="font-semibold capitalize">{plan}</span> plan. ({leadCount}/{limit === Infinity ? "Unlimited" : limit})
               </span>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {(isAdmin || isEnterprise) && <CreateCustomerAccountDialog />}
           {(!isAdmin) && <CreateContactDialog canAddMore={canAddMore} currentPlan={plan} />}
         </div>
       </div>

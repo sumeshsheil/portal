@@ -1,39 +1,33 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { format } from "date-fns";
-import {
-  Banknote,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { rejectPayment, verifyPayment } from "@/app/admin/(dashboard)/leads/[id]/payment-actions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { verifyPayment, rejectPayment } from "@/app/admin/(dashboard)/leads/[id]/payment-actions";
+import { format } from "date-fns";
+import {
+    AlertCircle, Banknote,
+    CheckCircle2, ChevronDown,
+    ChevronUp, Loader2, XCircle
+} from "lucide-react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface Payment {
@@ -55,6 +49,7 @@ interface PaymentManagerProps {
   paymentStatus?: string;
   customerEmail?: string;
   isAdmin?: boolean;
+  isWon?: boolean;
 }
 
 export function PaymentManager({
@@ -64,6 +59,7 @@ export function PaymentManager({
   paymentStatus,
   customerEmail,
   isAdmin = false,
+  isWon = false,
 }: PaymentManagerProps) {
   const [isPending, startTransition] = useTransition();
   const [rejectId, setRejectId] = useState<string | null>(null);
@@ -243,7 +239,7 @@ export function PaymentManager({
                       <div className="flex items-center gap-2 pt-2">
                         <Button 
                           className="flex-1 h-9 bg-emerald-600 hover:bg-emerald-700 font-bold text-black"
-                          disabled={isPending}
+                          disabled={isPending || isWon}
                           onClick={() => handleVerify(payment._id)}
                         >
                           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
@@ -252,7 +248,7 @@ export function PaymentManager({
                         <Button 
                           variant="destructive" 
                           className="flex-1 h-9 font-bold"
-                          disabled={isPending}
+                          disabled={isPending || isWon}
                           onClick={() => setRejectId(payment._id)}
                         >
                           <XCircle className="mr-2 h-4 w-4" />

@@ -1,5 +1,5 @@
-import { MetadataRoute } from "next";
 import { getPosts } from "@/lib/wordpress";
+import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://budgettravelpackages.in";
