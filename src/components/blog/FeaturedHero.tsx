@@ -33,14 +33,16 @@ export default function FeaturedHero({ post }: FeaturedHeroProps) {
   return (
     <section className="relative w-full min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden py-20 lg:py-32">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover scale-105"
-          priority
-        />
+      <div className="absolute inset-0 z-0 bg-slate-900">
+        {image && (
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover scale-105"
+            priority
+          />
+        )}
         {/* Dark Overlay Gradient - More sophisticated multi-stop gradient */}
         <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-transparent z-10" />
         <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent z-10" />
