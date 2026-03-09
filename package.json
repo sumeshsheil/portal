@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "rm -rf .next && next build",
     "start": "next start -- -p $PORT",
-    "lint": "eslint",
-    "deploy:hostinger": "rm -rf .next && npm ci && next build"
+    "lint": "eslint"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
