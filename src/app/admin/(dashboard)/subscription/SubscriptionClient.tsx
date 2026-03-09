@@ -37,6 +37,7 @@ interface Plan {
   description: string;
   features: string[];
   buttonText: string;
+  leadPrice?: string;
   isCurrent: (plan: string) => boolean;
   highlight: boolean;
   icon: React.ReactNode | null;
@@ -72,6 +73,7 @@ const PLANS: Plan[] = [
     name: "Basic",
     id: "basic",
     price: "₹50,000",
+    leadPrice: "Per lead less then ₹30",
     period: "/year",
     description: "For growing agents",
     features: [
@@ -97,6 +99,7 @@ const PLANS: Plan[] = [
       "Add Packages (Coming Soon)",
       "10 Hot Enquiries Daily",
     ],
+    leadPrice: "Per lead less then ₹25",
     buttonText: "Upgrade to Pro",
     isCurrent: (plan: string) => plan === "pro",
     highlight: true,
@@ -109,6 +112,7 @@ const PLANS: Plan[] = [
     id: "premium",
     price: "₹99,999",
     period: "/year",
+    leadPrice: "Per lead less then ₹20",
     description: "For established agencies",
     features: [
       "Unlimited Leads",
@@ -344,15 +348,19 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
                     <p className={`text-sm font-medium ${isEnterprise ? "text-slate-400/80" : plan.highlight ? "text-slate-400" : "text-slate-500 dark:text-slate-400"}`}>
                       {plan.description}
                     </p>
+                    
                   </div>
 
-                  <div className="mt-8 flex items-baseline gap-1.5">
-                    <span className={`text-5xl font-black tracking-tighter ${isEnterprise ? "text-emerald-400 [text-shadow:0_0_20px_rgba(52,211,153,0.3)]" : plan.highlight ? "text-emerald-400" : "text-slate-900 dark:text-white"}`}>
+                  <div className="mt-8">
+                    {plan.leadPrice && <p className="text-sm font-semibold">{plan.leadPrice}</p>}
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`text-5xl font-black tracking-tighter ${isEnterprise ? "text-emerald-400 [text-shadow:0_0_20px_rgba(52,211,153,0.3)]" : plan.highlight ? "text-emerald-400" : "text-slate-900 dark:text-white"}`}>
                       {plan.price}
                     </span>
                     <span className={`text-sm font-bold opacity-60 ${plan.highlight || isEnterprise ? "text-slate-400" : "text-slate-400"}`}>
                       {plan.period}
                     </span>
+                    </div>
                   </div>
                 </div>
 

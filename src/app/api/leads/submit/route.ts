@@ -212,37 +212,54 @@ export async function POST(request: Request) {
     const fullName =
       `${primaryContact.firstName} ${primaryContact.lastName}`.trim();
 
-    await Promise.allSettled([
-      sendWelcomeEmail({
-        name: primaryContact.firstName,
-        to: primaryContact.email,
-      }),
-      ...(setPasswordUrl
-        ? [
-            sendSetPasswordEmail({
-              name: primaryContact.firstName,
-              email: primaryContact.email,
-              setPasswordUrl,
-            }),
-          ]
-        : []),
-      sendLeadConfirmationEmail({
+    // Small delay helper to respect Resend's 2 requests/sec rate limit
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      if (setPasswordUrl) {
+        await sendWelcomeEmail({
+          name: primaryContact.firstName,
+          to: primaryContact.email,
+        });
+        await sleep(600);
+        await sendSetPasswordEmail({
+          name: primaryContact.firstName,
+          email: primaryContact.email,
+          setPasswordUrl,
+        });
+        await sleep(600);
+      } else {
+        // Even if no setPasswordUrl (existing user), still send welcome
+        // if this is a new lead flow. 
+        await sendWelcomeEmail({
+          name: primaryContact.firstName,
+          to: primaryContact.email,
+        });
+        await sleep(600);
+      }
+
+      await sendLeadConfirmationEmail({
         name: fullName,
         email: primaryContact.email,
         phone: primaryContact.phone,
         destination: validatedData.destination,
         budget: validatedData.budget,
         guests: validatedData.guests,
-      }),
-      sendLeadNotificationEmail({
+      });
+
+      await sleep(600);
+
+      await sendLeadNotificationEmail({
         name: fullName,
         email: primaryContact.email,
         phone: primaryContact.phone,
         destination: validatedData.destination,
         budget: validatedData.budget,
         guests: validatedData.guests,
-      }),
-    ]);
+      });
+    } catch (emailError) {
+      console.error("[Email] Sequential send error:", emailError);
+    }
 
     // Revalidate admin leads page so new lead shows up immediately
     revalidatePath("/admin/leads");
