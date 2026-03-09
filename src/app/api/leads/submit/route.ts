@@ -138,7 +138,8 @@ export async function POST(request: Request) {
           setPasswordExpires: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
         });
 
-        setPasswordUrl = `${process.env.NEXTAUTH_URL}/dashboard/set-password?token=${rawToken}`;
+        const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
+        setPasswordUrl = `${landingUrl}/?token=${rawToken}&action=set-password`;
       } catch (createError: unknown) {
         // Handle duplicate email (user may exist with different role)
         if (

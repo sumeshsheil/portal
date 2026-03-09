@@ -1,4 +1,3 @@
-import { getPosts } from "@/lib/wordpress";
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -14,14 +13,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // Dynamic blog posts
-  const { posts } = await getPosts();
-  const blogRoutes = posts.map((post: any) => ({
-    url: `${baseUrl}/blogs/${post.slug}`,
-    lastModified: new Date(post.date).toISOString(),
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
-
-  return [...routes, ...blogRoutes];
+  return routes;
 }

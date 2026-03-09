@@ -6,7 +6,6 @@ import Link from "next/link";
 import React, { Suspense, useEffect, useState } from "react";
 import MenuIcon from "../icons/Menu";
 
-import { searchBlogPosts, SearchResult } from "@/app/actions/blog-search";
 import { SOCIAL_LINKS } from "@/lib/constants";
 import { useDebouncedCallback } from "use-debounce";
 import YoutubeIcon from "../icons/Youtube";
@@ -58,31 +57,7 @@ const Header: React.FC = () => {
       ? logoPrimary
       : logoFooter;
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  const handleSearch = useDebouncedCallback(async (query: string) => {
-    if (!query || query.length < 2) return;
-    setIsSearching(true);
-    try {
-      const results = await searchBlogPosts(query);
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search failed:", error);
-    } finally {
-      setIsSearching(false);
-    }
-  }, 300);
-
-  useEffect(() => {
-    if (isSearchOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isSearchOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -199,131 +174,6 @@ const Header: React.FC = () => {
           </nav>
           <div>
             <div className="flex items-center gap-4 min-h-8">
-              <AnimatePresence mode="wait">
-                {isSearchOpen ? (
-                  <motion.div
-                    key="search-input"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 280, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="relative flex items-center bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm"
-                  >
-                    <div className="relative w-full">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          if (e.target.value.length >= 2) {
-                            handleSearch(e.target.value);
-                          } else {
-                            setSearchResults([]);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
-                            setIsSearchOpen(false);
-                            setSearchResults([]);
-                          }
-                        }}
-                        placeholder="Search blogs..."
-                        className="w-full bg-transparent text-white placeholder-white/70 text-sm px-4 py-2.5 focus:outline-none pr-8"
-                      />
-                      {isSearching && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setIsSearchOpen(false);
-                        setSearchQuery("");
-                        setSearchResults([]);
-                      }}
-                      className="pr-3 pl-1 text-white/70 hover:text-white transition-colors"
-                    >
-                      <X size={16} />
-                    </button>
-
-                    {/* Search Results Dropdown */}
-                    <AnimatePresence>
-                      {(searchResults.length > 0 ||
-                        (searchQuery.length >= 2 &&
-                          searchResults.length === 0 &&
-                          !isSearching)) && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          className="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-xl overflow-hidden z-50 border border-gray-100 max-h-[400px] overflow-y-auto"
-                        >
-                          {searchResults.length > 0 ? (
-                            <div className="py-2">
-                              {searchResults.map((post) => (
-                                <Link
-                                  key={post.id}
-                                  href={`/blogs/${post.slug}`}
-                                  onClick={() => {
-                                    setIsSearchOpen(false);
-                                    setSearchQuery("");
-                                    setSearchResults([]);
-                                  }}
-                                  className="flex items-start gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-50"
-                                >
-                                  <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                    <Image
-                                      src={post.featuredImage || ""}
-                                      alt={post.title}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                  <div className="flex flex-col gap-0.5">
-                                    <h4
-                                      className="text-sm font-semibold text-black line-clamp-2 leading-tight"
-                                      dangerouslySetInnerHTML={{
-                                        __html: post.title,
-                                      }}
-                                    />
-                                    <span className="text-[10px] text-gray-500">
-                                      {post.date}
-                                    </span>
-                                  </div>
-                                </Link>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="p-4 text-center text-gray-500 text-sm">
-                              No blogs found matching "{searchQuery}"
-                            </div>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                ) : (
-                  <motion.button
-                    key="search-icon"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => setIsSearchOpen(true)}
-                    className="text-white hover:text-[#01FF70] transition-colors p-1.5"
-                    aria-label="Open Search"
-                  >
-                    <Search
-                      size={26}
-                      className={isScrolled ? "text-white" : "text-white"}
-                    />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
               <div className="bg-white/30 h-6 w-px mx-0"></div>
 
               <motion.button

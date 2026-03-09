@@ -395,11 +395,11 @@ export async function sendLeadNotificationEmail({
   }
 }
 
-// 5. Send OTP Email (From HELLO_EMAIL)
+// 5. Send OTP Email (From NOREPLY_EMAIL)
 export async function sendOtpEmail({ email, otp }: OtpEmailProps) {
   try {
     const { data, error } = await resend.emails.send({
-      from: HELLO_EMAIL,
+      from: NOREPLY_EMAIL,
       to: [email],
       subject: "Password Reset OTP - Budget Travel Packages 🔒",
       html: `
@@ -439,7 +439,7 @@ export async function sendOtpEmail({ email, otp }: OtpEmailProps) {
   }
 }
 
-// 6. Send Agent Onboarding Email (From HELLO_EMAIL)
+// 6. Send Agent Onboarding Email (From NOREPLY_EMAIL)
 export async function sendAgentOnboardingEmail({
   name,
   to,
@@ -679,7 +679,7 @@ export async function sendAgentApprovalEmail({
   }
 }
 
-// 10. Send Lead Assignment Email (From BOOKINGS_EMAIL)
+// 10. Send Lead Assignment Email (From NOREPLY_EMAIL)
 export async function sendLeadAssignmentEmail({
   agentName,
   agentEmail,
@@ -703,7 +703,7 @@ export async function sendLeadAssignmentEmail({
       : `<p style="${styles.p}">A new lead has been assigned to you. Log in to your dashboard to view the lead's details and start the conversation.</p>`;
 
     const { data, error } = await resend.emails.send({
-      from: BOOKINGS_EMAIL,
+      from: NOREPLY_EMAIL,
       to: [agentEmail],
       subject,
       html: `
@@ -740,7 +740,7 @@ export async function sendLeadAssignmentEmail({
     return { success: false, error };
   }
 }
-// 11. Send Payment Status Notification (Confirmed or Rejected)
+// 11. Send Payment Status Notification (Confirmed or Rejected From BOOKINGS_EMAIL)
 export async function sendPaymentStatusNotification({
   to,
   name,
@@ -829,7 +829,7 @@ export async function sendPaymentStatusNotification({
   }
 }
 
-// 12. Send Final Document Upload Notification
+// 12. Send Final Document Upload Notification (From BOOKINGS_EMAIL)
 export async function sendFinalDocumentEmail({
   name,
   email,
@@ -890,7 +890,7 @@ export async function sendFinalDocumentEmail({
   }
 }
 
-// 13. Send Payout Status Notification to Agent
+// 13. Send Payout Status Notification to Agent (From NOREPLY_EMAIL)
 export async function sendPayoutStatusEmail({
   agentName,
   agentEmail,

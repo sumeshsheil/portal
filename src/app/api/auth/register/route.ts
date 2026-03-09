@@ -68,7 +68,8 @@ export async function POST(req: Request) {
     });
 
     // The link will open a popup on the landing page
-    const setPasswordUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/?token=${rawToken}&action=set-password`;
+    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
+    const setPasswordUrl = `${landingUrl}/?token=${rawToken}&action=set-password`;
 
     // Send Welcome and Set Password Emails
     await sendWelcomeEmail({

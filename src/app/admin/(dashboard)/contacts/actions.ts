@@ -173,8 +173,8 @@ export async function createCustomerAccount(formData: FormData) {
     });
 
     // Send welcome and set password emails
-    const landingUrl = process.env.LANDING_URL || process.env.NEXTAUTH_URL;
-    const setPasswordUrl = `${landingUrl}/dashboard/set-password?token=${token}`;
+    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
+    const setPasswordUrl = `${landingUrl}/?token=${token}&action=set-password`;
     await sendWelcomeEmail({
       name: user.name || name,
       to: normalizedEmail,

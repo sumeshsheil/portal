@@ -273,7 +273,8 @@ export async function createCustomer(prevState: unknown, formData: FormData) {
     });
 
     // Send welcome and set password emails
-    const setPasswordUrl = `${process.env.NEXTAUTH_URL}/set-password?token=${token}`;
+    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
+    const setPasswordUrl = `${landingUrl}/?token=${token}&action=set-password`;
     await sendWelcomeEmail({
       name: firstName,
       to: email.toLowerCase(),
