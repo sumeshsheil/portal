@@ -61,16 +61,18 @@ export default function BlogCard({ post, className }: BlogCardProps) {
       )}
     >
       {/* Image Section - Slimmer height version */}
-      <div className="relative w-full sm:w-[32%] shrink-0 overflow-hidden bg-gray-50">
-        <div className="aspect-21/9 sm:aspect-auto sm:h-full">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+      {image && (
+        <div className="relative w-full sm:w-[32%] shrink-0 overflow-hidden bg-gray-50">
+          <div className="aspect-21/9 sm:aspect-auto sm:h-full">
+            <Image
+              src={image}
+              alt={title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content Section - Compact padding */}
       <div className="flex-1 p-4 md:p-5 flex flex-col justify-between">

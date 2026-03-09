@@ -34,7 +34,7 @@ export async function searchBlogPosts(query: string): Promise<SearchResult[]> {
       }),
       featuredImage:
         (post._embedded?.["wp:featuredmedia"]?.[0]?.source_url as string) ||
-        "/images/blog/placeholder.jpg",
+        undefined,
     }));
   } catch (error) {
     console.error("Search error:", error);

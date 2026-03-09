@@ -15,19 +15,16 @@ interface RecentPost {
   };
 }
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=400&q=60";
-
-function extractImage(post: RecentPost): string {
+function extractImage(post: RecentPost): string | null {
   const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  if (!media) return FALLBACK_IMAGE;
+  if (!media) return null;
   const raw = media.source_url;
   if (Array.isArray(raw)) {
     return typeof raw[0] === "string" && raw[0].length > 0
       ? raw[0]
-      : FALLBACK_IMAGE;
+      : null;
   }
-  return typeof raw === "string" && raw.length > 0 ? raw : FALLBACK_IMAGE;
+  return typeof raw === "string" && raw.length > 0 ? raw : null;
 }
 
 export default function FooterRecentBlogs() {
@@ -60,15 +57,17 @@ export default function FooterRecentBlogs() {
             className="group flex items-start gap-3 hover:opacity-80 transition-opacity"
           >
             {/* Small Thumbnail */}
-            <div className="relative w-16 h-12 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border border-gray-200/50">
-              <Image
-                src={extractImage(post)}
-                alt={decodeHtmlEntities(post.title.rendered.replace(/<[^>]+>/g, ""))}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="80px"
-              />
-            </div>
+            {extractImage(post) && (
+              <div className="relative w-16 h-12 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border border-gray-200/50">
+                <Image
+                  src={extractImage(post)!}
+                  alt={decodeHtmlEntities(post.title.rendered.replace(/<[^>]+>/g, ""))}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="80px"
+                />
+              </div>
+            )}
 
             {/* Title */}
             <p className="text-xs md:text-sm font-medium text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-snug font-open-sans">
