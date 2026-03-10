@@ -1,6 +1,7 @@
 import User from "@/lib/db/models/User";
 import { connectDB } from "@/lib/db/mongoose";
 import { sendAgentVerificationNotification } from "@/lib/email";
+import { createBulkNotification } from "@/lib/notifications";
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -118,6 +119,19 @@ export async function POST(req: Request) {
       agentGender: user.gender,
       agentAge: user.age,
     });
+
+    // Send In-App Notifications to Admins
+    const admins = await User.find({ role: "admin" }, "_id").lean();
+    const adminIds = admins.map((admin) => admin._id.toString());
+
+    if (adminIds.length > 0) {
+      await createBulkNotification(adminIds, {
+        title: "New Agent Onboarding",
+        message: `${user.name} has completed their onboarding and is pending verification.`,
+        type: "info",
+        link: `/admin/agents/pending`, // Assuming this is the link to verify agents
+      });
+    }
 
     return NextResponse.json(
       {

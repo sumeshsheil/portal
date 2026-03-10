@@ -6,7 +6,8 @@ export type LeadStage =
   | "negotiation"
   | "won"
   | "dropped"
-  | "abandoned";
+  | "abandoned"
+  | "marketing_ads";
 
 export interface KanbanLead {
   _id: string;
@@ -46,4 +47,15 @@ export const LEAD_STAGES: LeadStage[] = [
   "won",
   "dropped",
   "abandoned",
+];
+
+export const AGENT_LEAD_STAGES: LeadStage[] = [
+  "new",
+  "contacted",
+  "booked",
+  "proposal_sent",
+  "negotiation",
+  "abandoned",
+  "dropped",
+  "marketing_ads",
 ];

@@ -10,13 +10,14 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { KanbanCard } from "./KanbanCard";
 import { KanbanColumn } from "./KanbanColumn";
-import { KanbanLead, LeadStage, LEAD_STAGES } from "./types";
+import { KanbanLead, LeadStage, LEAD_STAGES, AGENT_LEAD_STAGES } from "./types";
 
 interface KanbanBoardProps {
   initialLeads: KanbanLead[];
+  isAgent?: boolean;
 }
 
-export function KanbanBoard({ initialLeads }: KanbanBoardProps) {
+export function KanbanBoard({ initialLeads, isAgent }: KanbanBoardProps) {
   const [leads, setLeads] = useState<KanbanLead[]>(initialLeads);
   const [activeLead, setActiveLead] = useState<KanbanLead | null>(null);
 
@@ -86,7 +87,7 @@ export function KanbanBoard({ initialLeads }: KanbanBoardProps) {
     const newStage = over.id as LeadStage;
 
     const lead = leads.find((l) => l._id === leadId);
-    if (!lead || lead.stage === newStage) return;
+    if (!lead || lead.stage === newStage || newStage === "marketing_ads") return;
 
     if (lead.stage === "won") {
       toast.error("Confirmed trips cannot be moved back to active stages.");
@@ -139,9 +140,9 @@ export function KanbanBoard({ initialLeads }: KanbanBoardProps) {
     >
       <div
         data-lenis-prevent
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 pb-4"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4"
       >
-        {LEAD_STAGES.map((stage) => (
+        {(isAgent ? AGENT_LEAD_STAGES : LEAD_STAGES).map((stage) => (
           <KanbanColumn
             data-lenis-prevent
             key={stage}

@@ -208,6 +208,7 @@ export default async function LeadsPage({
           initialLeads={
             leads as unknown as import("@/components/admin/leads/kanban/types").KanbanLead[]
           }
+          isAgent={session.user.role === "agent"}
         />
       ) : (
         <>

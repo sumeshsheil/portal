@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
                 Start your travel business from home. Get domestic & international
                 leads, sell your own packages, and earn high commissions.
               </p>
-              <h1 className="text-3xl sm:text-4xl xl:text-[48px] font-bold tracking-tight whitespace-nowrap text-black leading-tight">
+              <h1 className="text-3xl sm:text-4xl xl:text-[48px] font-bold tracking-tight xl:whitespace-nowrap text-black leading-tight">
                 Become a Travel Partner in India <br className="hidden xl:block" />
                 <span className="text-emerald-600 block mt-2">Earn Up to ₹1.5 Lakh/Month</span>
               </h1>

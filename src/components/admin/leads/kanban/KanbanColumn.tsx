@@ -20,6 +20,7 @@ const STAGE_COLORS: Record<LeadStage, string> = {
   won: "bg-emerald-600",
   dropped: "bg-red-500",
   abandoned: "bg-gray-500",
+  marketing_ads: "bg-purple-500",
 };
 
 const STAGE_LABELS: Record<LeadStage, string> = {
@@ -31,6 +32,7 @@ const STAGE_LABELS: Record<LeadStage, string> = {
   won: "Trip Confirmed",
   dropped: "Dropped",
   abandoned: "Abandoned",
+  marketing_ads: "Marketing Ads",
 };
 
 export function KanbanColumn({ stage, leads }: KanbanColumnProps) {
@@ -65,12 +67,29 @@ export function KanbanColumn({ stage, leads }: KanbanColumnProps) {
         ref={setNodeRef}
         className={cn(
           "flex-1 p-2 space-y-2 overflow-y-auto scrollbar-hide min-h-[150px] transition-colors",
-          isOver && "bg-emerald-500/5 ring-2 ring-emerald-500/20 ring-inset",
+          isOver && stage !== "marketing_ads" && "bg-emerald-500/5 ring-2 ring-emerald-500/20 ring-inset",
         )}
       >
-        {leads.map((lead) => (
-          <KanbanCard key={lead._id} lead={lead} />
-        ))}
+        {stage === "marketing_ads" ? (
+          <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-4 bg-background/40 rounded-lg border border-dashed border-purple-500/30">
+            <div className="p-3 bg-purple-500/10 rounded-full">
+              <span className="text-2xl">🚀</span>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-bold text-sm text-purple-600 dark:text-purple-400">
+                Enterprise Plan
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Check out our Enterprise plan to earn more and grow your business.
+              </p>
+            </div>
+            <button className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-purple-500/20 active:scale-95">
+              Learn More
+            </button>
+          </div>
+        ) : (
+          leads.map((lead) => <KanbanCard key={lead._id} lead={lead} />)
+        )}
       </div>
     </div>
   );

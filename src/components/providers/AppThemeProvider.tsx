@@ -15,7 +15,9 @@ export function AppThemeProvider({ children }: AppThemeProviderProps) {
   // This includes the landing page, blog pages, thank you page, etc.
   // Essentially everything EXCEPT the dashboard and admin panels.
   const isPublicRoute =
-    !pathname?.startsWith("/dashboard") && !pathname?.startsWith("/admin");
+    (!pathname?.startsWith("/dashboard") && !pathname?.startsWith("/admin")) ||
+    pathname?.startsWith("/admin/onboarding") ||
+    pathname?.startsWith("/admin/change-password");
 
   return (
     <ThemeProvider
