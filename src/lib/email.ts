@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { getAgentWelcomeEmailHtml, getLeadConfirmationEmailHtml, getWelcomeEmailHtml } from "./email-templates";
+import { getAgentWelcomeEmailHtml, getBookingConfirmedEmailHtml, getLeadConfirmationEmailHtml, getWelcomeEmailHtml } from "./email-templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -7,6 +7,11 @@ const BOOKINGS_EMAIL = "Budget Travel Packages <booking@budgettravelpackages.in>
 const HELLO_EMAIL = "Budget Travel Packages <hello@budgettravelpackages.in>";
 const NOREPLY_EMAIL = "Budget Travel Packages <noreply@budgettravelpackages.in>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@budgettravelpackages.in";
+
+export const DASHBOARD_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.LANDING_URL || "https://budgettravelpackages.in"
+    : process.env.LOCAL_LANDING_URL || "http://localhost:3000";
 
 // --- Email Templates (Shared Styles) ---
 
@@ -128,6 +133,12 @@ interface OtpEmailProps {
   otp: string;
 }
 
+interface BookingConfirmedProps {
+  name: string;
+  email: string;
+  destination: string;
+}
+
 // --- Email Functions ---
 
 // 1. Send General Welcome Email (From HELLO_EMAIL)
@@ -143,7 +154,7 @@ export async function sendWelcomeEmail({
       from: HELLO_EMAIL,
       to: [to],
       subject: "Welcome to Budget Travel Packages! 🌍",
-      html: getWelcomeEmailHtml(name),
+      html: getWelcomeEmailHtml(name, DASHBOARD_URL),
     });
 
     if (error) {
@@ -326,7 +337,7 @@ export async function sendLeadConfirmationEmail({
       from: BOOKINGS_EMAIL,
       to: [email],
       subject: `Booking Received: Trip to ${destination} ✈️`,
-      html: getLeadConfirmationEmailHtml(name, destination, guests, budget.toString(), phone),
+      html: getLeadConfirmationEmailHtml(name, destination, guests, budget.toString(), phone, DASHBOARD_URL),
     });
 
     if (error) {
@@ -537,7 +548,7 @@ export async function sendAgentVerificationNotification({
             <p style="${styles.p}">Log in to the admin portal to review their documents and verify.</p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL}/admin/agents" style="${styles.button}">Verify in Admin Portal</a>
+              <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || process.env.NEXTAUTH_URL}/admin/agents" style="${styles.button}">Verify in Admin Portal</a>
             </div>
           </div>
           <div style="${styles.footer}">
@@ -798,7 +809,7 @@ export async function sendPaymentStatusNotification({
           ` : ""}
 
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXTAUTH_URL}/dashboard/bookings" style="${styles.button}">View Dashboard</a>
+            <a href="${DASHBOARD_URL}/dashboard/bookings" style="${styles.button}">View Dashboard</a>
           </div>
 
           <p style="${styles.p}">If you have any questions, please reply to this email or contact your assigned agent.</p>
@@ -997,7 +1008,7 @@ export async function sendTravelDocumentEmail({
           <p style="${styles.p}">Please review the documents carefully. You can also always access them securely by logging into your Budget Travel Packages dashboard.</p>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXTAUTH_URL}/dashboard/bookings" style="color: #666; text-decoration: underline; font-size: 14px;">Log in to your dashboard</a>
+            <a href="${DASHBOARD_URL}/dashboard/bookings" style="color: #666; text-decoration: underline; font-size: 14px;">Log in to your dashboard</a>
           </div>
 
           <p style="${styles.p}">Wishing you a wonderful trip ahead!</p>
@@ -1025,6 +1036,32 @@ export async function sendTravelDocumentEmail({
   } catch (error) {
     console.error("Email Exception (Travel Documents):", error);
     return { success: false, error };
+  }
+}
+
+// 12. Send Booking Confirmed Email (From BOOKINGS_EMAIL)
+export async function sendBookingConfirmedEmail({
+  name,
+  email,
+  destination,
+}: BookingConfirmedProps) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: BOOKINGS_EMAIL,
+      to: [email],
+      subject: `Your Booking is Confirmed! - ${destination} ✈️`,
+      html: getBookingConfirmedEmailHtml(name, destination, DASHBOARD_URL),
+    });
+
+    if (error) {
+      console.error("Resend error (Booking Confirmed):", error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error sending booking confirmed email:", error);
+    throw error;
   }
 }
 

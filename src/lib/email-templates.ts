@@ -351,7 +351,7 @@ export function getAgentWelcomeEmailHtml(name: string) {
 }
 
 
-export function getWelcomeEmailHtml(name: string) {
+export function getWelcomeEmailHtml(name: string, dashboardUrl: string) {
   return `<!doctype html>
 <html lang="en" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -625,7 +625,7 @@ export function getWelcomeEmailHtml(name: string) {
                                   <tbody>
                                     <tr>
                                       <td align="center" bgcolor="#d2d735" role="presentation" style="border:none;border-radius:30px;cursor:auto;mso-padding-alt:10px 25px;background:#d2d735;" valign="middle">
-                                        <a href="https://budgettravelpackages.in/" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:30px;" target="_blank"> Book Your Escape Now </a>
+                                        <a href="${dashboardUrl}/" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:30px;" target="_blank"> Book Your Escape Now </a>
                                       </td>
                                     </tr>
                                   </tbody>
@@ -783,7 +783,7 @@ export function getWelcomeEmailHtml(name: string) {
                           <tbody>
                             <tr>
                               <td align="center" bgcolor="#d2d735" role="presentation" style="border:none;border-radius:30px;cursor:auto;mso-padding-alt:10px 25px;background:#d2d735;" valign="middle">
-                                <a href="https://budgettravelpackages.in/blogs" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:30px;" target="_blank"> Discover More </a>
+                                <a href="${dashboardUrl}/blogs" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:30px;" target="_blank"> Discover More </a>
                               </td>
                             </tr>
                           </tbody>
@@ -1261,7 +1261,7 @@ export function getWelcomeEmailHtml(name: string) {
 }
 
 
-export function getLeadConfirmationEmailHtml(name: string, destination: string, travelers: number, budget: string, phone: string) {
+export function getLeadConfirmationEmailHtml(name: string, destination: string, travelers: number, budget: string, phone: string, dashboardUrl: string) {
   return `
 <!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" lang="en">
@@ -1432,7 +1432,7 @@ export function getLeadConfirmationEmailHtml(name: string, destination: string, 
 																			<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																				<tr>
 																					<td class="alignment" style="text-align:center;font-size:0px;">
-																						<div class="menu-links"><a href="https://budgettravelpackages.in/blogs" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;">Travel Blogs</a><a href="https://portal.budgettravelpackages.in/" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;"> Travel Portal</a><a href="https://budgettravelpackages.in/legal" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;">Legal Policies</a></div>
+																						<div class="menu-links"><a href="${dashboardUrl}/blogs" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;">Travel Blogs</a><a href="https://portal.budgettravelpackages.in/" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;"> Travel Portal</a><a href="${dashboardUrl}/legal" target="_blank" style="padding-top:0px;padding-bottom:0px;padding-left:16px;padding-right:16px;display:inline-block;color:#ffffff;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:normal;">Legal Policies</a></div>
 																					</td>
 																				</tr>
 																			</table>
@@ -1490,5 +1490,217 @@ export function getLeadConfirmationEmailHtml(name: string, destination: string, 
 </body>
 </html>
 `;
+}
+
+export function getBookingConfirmedEmailHtml(name: string, destination: string, dashboardUrl: string) {
+  return `<!doctype html>
+<html lang="en" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+  <title>Your Booking is Confirmed! - Budget Travel Packages</title>
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style type="text/css">
+    #outlook a {
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    p {
+      display: block;
+      margin: 13px 0;
+    }
+
+  </style>
+  <!--[if mso]>
+    <noscript>
+    <xml>
+    <o:OfficeDocumentSettings>
+      <o:AllowPNG/>
+      <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+    </xml>
+    </noscript>
+    <![endif]-->
+  <style type="text/css">
+    @media only screen and (min-width:480px) {
+      .mj-column-per-100 {
+        width: 100% !important;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body style="word-spacing:normal;background-color:#ffffff;">
+  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">Your trip to \${destination} is confirmed! Pack your bags!</div>
+  <div style="background-color:#ffffff;" role="article" lang="en" dir="auto">
+    <!-- Header Logo -->
+    <div style="background:#007d9f;background-color:#007d9f;margin:0px auto;max-width:600px;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#007d9f;background-color:#007d9f;width:100%;">
+        <tbody>
+          <tr>
+            <td style="direction:ltr;font-size:0px;padding:40px 0 20px 0;text-align:center;">
+              <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
+                  <tbody>
+                    <tr>
+                      <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
+                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;border-spacing:0px;">
+                          <tbody>
+                            <tr>
+                              <td style="width:340px;">
+                                <img alt="Logo" src="https://ik.imagekit.io/rmsdevelopment/welcome-email/welcome-email-2_budget-travel-packages-high-resolution-logo-transparent.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="340" height="auto">
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Hero Section -->
+    <div style="background:#007d9f url('https://ik.imagekit.io/rmsdevelopment/welcome-email/welcome-email-1_15_Background_Palms.png') center top / auto no-repeat;background-position:center top;background-repeat:no-repeat;background-size:auto;margin:0px auto;max-width:600px;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+        <tbody>
+          <tr>
+            <td style="direction:ltr;font-size:0px;padding:20px 0 0 0;text-align:center;">
+              <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
+                  <tbody>
+                    <tr>
+                      <td align="center" style="font-size:0px;padding:10px 25px;padding-bottom:20px;word-break:break-word;">
+                        <div style="font-family:Arial, sans-serif;font-size:50px;letter-spacing:-1px;line-height:1;text-align:center;color:#ffffff;">Booking <br> Confirmed !</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" style="font-size:0px;padding:0;word-break:break-word;">
+                        <img alt="Travel" src="https://ik.imagekit.io/rmsdevelopment/welcome-email/welcome-email-3_02_Header_image_email.png" style="border:0;border-radius:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="600" height="auto">
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Content Section -->
+    <div style="background:#007d9f;background-color:#007d9f;margin:0px auto;max-width:600px;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#007d9f;background-color:#007d9f;width:100%;">
+        <tbody>
+          <tr>
+            <td style="direction:ltr;font-size:0px;padding:0 0 60px 0;text-align:center;">
+              <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                  <tbody>
+                    <tr>
+                      <td style="vertical-align:top;padding:0 30px;">
+                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                          <tbody>
+                            <tr>
+                              <td align="center" style="font-size:0px;padding:10px 25px;padding-top:30px;word-break:break-word;">
+                                <div style="font-family:Arial, sans-serif;font-size:24px;font-weight:700;line-height:24px;text-align:center;color:#ffffff;">Congratulations \${name}!</div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
+                                <div style="font-family:Arial, sans-serif;font-size:18px;line-height:24px;text-align:center;color:#ffffff;">Thank you for choosing Budget Travel Packages for your trip to <strong>\${destination}</strong>. We are honored to be part of your adventure!</div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size:0px;padding:10px 25px;padding-top:20px;word-break:break-word;">
+                                <div style="font-family:Arial, sans-serif;font-size:18px;line-height:24px;text-align:center;color:#ffffff;">Your itinerary and travel documents are now available in your dashboard. We pray for your safe, joyful, and memorable journey!</div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size:0px;padding:30px 25px;word-break:break-word;">
+                                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;line-height:100%;">
+                                  <tbody>
+                                    <tr>
+                                      <td align="center" bgcolor="#d2d735" role="presentation" style="border:none;border-radius:30px;cursor:auto;mso-padding-alt:10px 25px;background:#d2d735;" valign="middle">
+                                        <a href="\${dashboardUrl}/dashboard/bookings" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 30px;border-radius:30px;" target="_blank"> View My Booking </a>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#fef8ec;background-color:#fef8ec;margin:0px auto;max-width:600px;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#fef8ec;background-color:#fef8ec;width:100%;">
+        <tbody>
+          <tr>
+            <td style="direction:ltr;font-size:0px;padding:40px 0;text-align:center;">
+              <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
+                  <tbody>
+                    <tr>
+                      <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
+                        <div style="font-family:Arial, sans-serif;font-size:14px;line-height:1.2;text-align:center;color:#3c3c3c;">
+                          <p style="margin: 0; margin-bottom: 8px;"><strong>Budget Travel Packages ™️</strong></p>
+                          <p style="margin: 0; margin-bottom: 8px;">Bengal Eco Intelligent Park, Sector V, Kolkata, India</p>
+                          <p style="margin: 0;">Copyright ©. All Rights Reserved.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 

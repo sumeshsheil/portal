@@ -278,6 +278,7 @@ export default function SubscriptionClient({ user }: SubscriptionClientProps) {
             return (
               <motion.div
                 key={plan.name}
+                id={isEnterprise ? "enterprise-plan" : undefined}
                 whileHover={{ y: -8, scale: 1.01 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className={`relative overflow-hidden rounded-[2.5rem] border-2 flex flex-col transition-all duration-500 group ${

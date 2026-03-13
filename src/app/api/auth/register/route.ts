@@ -1,6 +1,6 @@
 import User from "@/lib/db/models/User";
 import { connectDB } from "@/lib/db/mongoose";
-import { sendSetPasswordEmail, sendWelcomeEmail } from "@/lib/email";
+import { DASHBOARD_URL, sendSetPasswordEmail, sendWelcomeEmail } from "@/lib/email";
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -68,8 +68,7 @@ export async function POST(req: Request) {
     });
 
     // The link will open a popup on the landing page
-    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
-    const setPasswordUrl = `${landingUrl}/?token=${rawToken}&action=set-password`;
+    const setPasswordUrl = `${DASHBOARD_URL}/?token=${rawToken}&action=set-password`;
 
     // Send Welcome and Set Password Emails
     await sendWelcomeEmail({

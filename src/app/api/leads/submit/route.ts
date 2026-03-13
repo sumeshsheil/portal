@@ -4,7 +4,8 @@ import User from "@/lib/db/models/User";
 import { connectDB } from "@/lib/db/mongoose";
 import {
     sendLeadConfirmationEmail,
-    sendLeadNotificationEmail, sendSetPasswordEmail, sendWelcomeEmail
+    sendLeadNotificationEmail, sendSetPasswordEmail, sendWelcomeEmail,
+    DASHBOARD_URL
 } from "@/lib/email";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -138,8 +139,7 @@ export async function POST(request: Request) {
           setPasswordExpires: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
         });
 
-        const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
-        setPasswordUrl = `${landingUrl}/?token=${rawToken}&action=set-password`;
+        setPasswordUrl = `${DASHBOARD_URL}/?token=${rawToken}&action=set-password`;
       } catch (createError: unknown) {
         // Handle duplicate email (user may exist with different role)
         if (

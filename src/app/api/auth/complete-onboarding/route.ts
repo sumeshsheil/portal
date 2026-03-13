@@ -129,7 +129,7 @@ export async function POST(req: Request) {
         title: "New Agent Onboarding",
         message: `${user.name} has completed their onboarding and is pending verification.`,
         type: "info",
-        link: `/admin/agents/pending`, // Assuming this is the link to verify agents
+        link: "/admin/agents", // Assuming this is the link to verify agents
       });
     }
 

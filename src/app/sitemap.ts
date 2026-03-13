@@ -1,10 +1,10 @@
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://budgettravelpackages.in";
+  const baseUrl = "https://portal.budgettravelpackages.in";
 
   // Static routes
-  const routes = ["", "/blogs"].map(
+  const routes = ["",].map(
     (route) => ({
       url: `${baseUrl}${route}`,
       lastModified: new Date().toISOString(),

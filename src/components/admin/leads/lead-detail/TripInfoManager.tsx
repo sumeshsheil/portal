@@ -66,10 +66,10 @@ export function TripInfoManager({
     day && month && year ? new Date(year, month - 1, day) : undefined,
   );
 
-  const [formNetAmount, setFormNetAmount] = useState(netAmount || 0);
-  const [formTripProfit, setFormTripProfit] = useState(tripProfit || 0);
+  const [formNetAmount, setFormNetAmount] = useState<string>(netAmount?.toString() || "");
+  const [formTripProfit, setFormTripProfit] = useState<string>(tripProfit?.toString() || "");
 
-  const formTotalCost = formNetAmount + formTripProfit;
+  const formTotalCost = (Number(formNetAmount) || 0) + (Number(formTripProfit) || 0);
 
   const handleSave = (formData: FormData) => {
     setError("");
@@ -218,7 +218,7 @@ export function TripInfoManager({
                   type="number"
                   min={0}
                   value={formNetAmount}
-                  onChange={(e) => setFormNetAmount(Number(e.target.value))}
+                  onChange={(e) => setFormNetAmount(e.target.value)}
                   placeholder="Cost to company"
                 />
               </div>
@@ -232,7 +232,7 @@ export function TripInfoManager({
                   name="tripProfit"
                   type="number"
                   value={formTripProfit}
-                  onChange={(e) => setFormTripProfit(Number(e.target.value))}
+                  onChange={(e) => setFormTripProfit(e.target.value)}
                   placeholder="Internal margin"
                 />
               </div>

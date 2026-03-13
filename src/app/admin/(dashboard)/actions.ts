@@ -6,7 +6,7 @@ import Lead from "@/lib/db/models/Lead";
 import Notification from "@/lib/db/models/Notification";
 import User from "@/lib/db/models/User";
 import { connectDB } from "@/lib/db/mongoose";
-import { sendSetPasswordEmail, sendWelcomeEmail } from "@/lib/email";
+import { DASHBOARD_URL, sendSetPasswordEmail, sendWelcomeEmail } from "@/lib/email";
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
@@ -273,8 +273,7 @@ export async function createCustomer(prevState: unknown, formData: FormData) {
     });
 
     // Send welcome and set password emails
-    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
-    const setPasswordUrl = `${landingUrl}/?token=${token}&action=set-password`;
+    const setPasswordUrl = `${DASHBOARD_URL}/?token=${token}&action=set-password`;
     await sendWelcomeEmail({
       name: firstName,
       to: email.toLowerCase(),

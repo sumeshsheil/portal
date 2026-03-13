@@ -138,7 +138,7 @@ export async function createCustomerAccount(formData: FormData) {
     // 3. Create a new User account
     const crypto = await import("crypto");
     const bcryptjs = await import("bcryptjs");
-    const { sendWelcomeEmail, sendSetPasswordEmail } = await import("@/lib/email");
+    const { sendWelcomeEmail, sendSetPasswordEmail, DASHBOARD_URL } = await import("@/lib/email");
 
     // Generate random temporary password
     const tempPassword = crypto.randomBytes(8).toString("hex");
@@ -173,8 +173,7 @@ export async function createCustomerAccount(formData: FormData) {
     });
 
     // Send welcome and set password emails
-    const landingUrl = process.env.LANDING_URL || "http://localhost:3000";
-    const setPasswordUrl = `${landingUrl}/?token=${token}&action=set-password`;
+    const setPasswordUrl = `${DASHBOARD_URL}/?token=${token}&action=set-password`;
     await sendWelcomeEmail({
       name: user.name || name,
       to: normalizedEmail,

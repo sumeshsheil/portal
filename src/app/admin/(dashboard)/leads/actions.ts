@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import Lead from "@/lib/db/models/Lead";
 import User from "@/lib/db/models/User";
 import { connectDB } from "@/lib/db/mongoose";
-import { sendLeadAssignmentEmail } from "@/lib/email";
+import { sendLeadAssignmentEmail, sendBookingConfirmedEmail } from "@/lib/email";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { createNotification } from "@/lib/notifications";
 import mongoose from "mongoose";
@@ -270,6 +270,24 @@ export async function updateLeadStage(leadId: string, newStage: string) {
     lead.lastActivityAt = new Date();
     lead.stageUpdatedAt = new Date();
     await lead.save();
+
+    // Trigger automated email if stage changed to 'won'
+    if (newStage === "won" && previousStage !== "won") {
+      const customerEmail = lead.travelers?.[0]?.email;
+      const customerName = lead.travelers?.[0]?.name;
+      if (customerEmail) {
+        try {
+          await sendBookingConfirmedEmail({
+            name: customerName || "Traveler",
+            email: customerEmail,
+            destination: lead.destination,
+          });
+        } catch (emailError) {
+          console.error("Failed to send booking confirmation email:", emailError);
+          // We don't fail the whole action if just the email fails, but we log it
+        }
+      }
+    }
 
     // Log activity
     const session = await auth();
