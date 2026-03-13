@@ -1558,7 +1558,7 @@ export function getBookingConfirmedEmailHtml(name: string, destination: string, 
 </head>
 
 <body style="word-spacing:normal;background-color:#ffffff;">
-  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">Your trip to \${destination} is confirmed! Pack your bags!</div>
+  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">Your trip to ${destination} is confirmed! Pack your bags!</div>
   <div style="background-color:#ffffff;" role="article" lang="en" dir="auto">
     <!-- Header Logo -->
     <div style="background:#007d9f;background-color:#007d9f;margin:0px auto;max-width:600px;">
@@ -1634,12 +1634,12 @@ export function getBookingConfirmedEmailHtml(name: string, destination: string, 
                           <tbody>
                             <tr>
                               <td align="center" style="font-size:0px;padding:10px 25px;padding-top:30px;word-break:break-word;">
-                                <div style="font-family:Arial, sans-serif;font-size:24px;font-weight:700;line-height:24px;text-align:center;color:#ffffff;">Congratulations \${name}!</div>
+                                <div style="font-family:Arial, sans-serif;font-size:24px;font-weight:700;line-height:24px;text-align:center;color:#ffffff;">Congratulations ${name}!</div>
                               </td>
                             </tr>
                             <tr>
                               <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                <div style="font-family:Arial, sans-serif;font-size:18px;line-height:24px;text-align:center;color:#ffffff;">Thank you for choosing Budget Travel Packages for your trip to <strong>\${destination}</strong>. We are honored to be part of your adventure!</div>
+                                <div style="font-family:Arial, sans-serif;font-size:18px;line-height:24px;text-align:center;color:#ffffff;">Thank you for choosing Budget Travel Packages for your trip to <strong>${destination}</strong>. We are honored to be part of your adventure!</div>
                               </td>
                             </tr>
                             <tr>
@@ -1653,7 +1653,7 @@ export function getBookingConfirmedEmailHtml(name: string, destination: string, 
                                   <tbody>
                                     <tr>
                                       <td align="center" bgcolor="#d2d735" role="presentation" style="border:none;border-radius:30px;cursor:auto;mso-padding-alt:10px 25px;background:#d2d735;" valign="middle">
-                                        <a href="\${dashboardUrl}/dashboard/bookings" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 30px;border-radius:30px;" target="_blank"> View My Booking </a>
+                                        <a href="${dashboardUrl}/dashboard/bookings" style="display:inline-block;background:#d2d735;color:#024f64;font-family:Arial, sans-serif;font-size:16px;font-weight:700;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 30px;border-radius:30px;" target="_blank"> View My Booking </a>
                                       </td>
                                     </tr>
                                   </tbody>
